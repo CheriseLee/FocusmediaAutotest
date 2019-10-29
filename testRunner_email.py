@@ -6,16 +6,12 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
-import time
 from BSTestRunner import *
 import unittest
-import test_createCampaign
-from test_createCampaign import createCampaign
 
-from email.header import Header
 
 def send_mail(latest_report):
-    #获取最新报告，以二进制方式打开测试报告
+    # 获取最新报告，以二进制方式打开测试报告
     f = open(latest_report, 'rb')
     send_file = f.read()
     f.close()
@@ -36,7 +32,7 @@ def send_mail(latest_report):
     # 邮件正文,定义附件
     att = MIMEText(send_file, 'base64', 'utf-8')
     att['Content-Type'] = 'application/octet-stream'
-    #附件命名,获取当前时间
+    # 附件命名,获取当前时间
     now = time.strftime("%Y-%m-%d %H_%M_%S")
     att['Content-Disposition'] = ("attachment;filename=ad_Group_TestReport_%s.html")%now
 
@@ -61,6 +57,7 @@ def send_mail(latest_report):
     smtp.quit()
     print("Send success")
 
+
 def latest_report(report_dir):
     lists = os.listdir(report_dir)
     # 按时间顺序对文件排序
@@ -71,6 +68,7 @@ def latest_report(report_dir):
     file = os.path.join(report_dir, lists[-3])
     # print(file)
     return file
+
 
 def test_suite():
     # 定义测试用例集
@@ -93,6 +91,7 @@ def test_suite():
 
     # latestReport = latest_report(report_dir)
     # send_mail(latestReport)
+
 
 if __name__ == '__main__':
     test_suite()

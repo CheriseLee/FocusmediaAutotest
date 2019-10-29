@@ -1,99 +1,113 @@
 import xlrd
 import xlwt
-from urllib import request
+import time_function
 import requests
 import global_demo
+"""
+对单元进行排播；
+目前仅支持时长为15s、30s的单元；
+@lihuanhuan@focusmedia.cn
+"""
 
-file = 'createStrategy.xls'
 
-def creative_Info():
-    creative_Info={
-        "186073": "186073_C100828",  #15s
-        "191738": "191738_C100620",   #15s
-        "start_date":"2019-09-30",
-        "end_date":"2019-10-13"
-    }
-    return creative_Info
+class CreateStrategy:
+    @staticmethod
+    def creative_Info_15():
+        """配置15s排播的创意信息"""
+        creative_info_15 = {
+            "186073": "186073_C100828",
+            "191738": "191738_C100620",
+        }
+        return creative_info_15
 
-def read_excel():
+    @staticmethod
+    def creative_Info_30():
+        """配置30s排播的创意信息"""
+        creative_info_30 = {
+            "186073": "186073_C103805",
+            "191738": "191738_C103806",
+        }
+        return creative_info_30
 
-    wb = xlrd.open_workbook(filename=file)#打开文件
-    # print(wb.sheet_names())#获取所有表格名字
+    @staticmethod
+    def read_excel(file):
+        """打开文件,读取单元的排播信息"""
+        wb = xlrd.open_workbook(filename=file)
+        sheet1 = wb.sheet_by_index(0)
+        total_rows = sheet1.nrows
+        unit_list = []
+        for i in range(total_rows):
+            '''获取行内容'''
+            rows = sheet1.row_values(i)
+            unit_list.append(rows)
+        return unit_list
 
-    sheet1 = wb.sheet_by_index(0)#通过索引获取表格
-    #获取表格的总行数
-    totalRows=sheet1.nrows
-    totalCols=sheet1.ncols
-    unitList = []
-    for i in range(totalRows):
+    @staticmethod
+    def set_style(name, height, bold=False):
+        '''设置表格样式'''
+        style = xlwt.XFStyle()
+        font = xlwt.Font()
+        font.name = name
+        font.bold = bold
+        font.color_index = 4
+        font.height = height
+        style.font = font
+        return style
 
-        rows = sheet1.row_values(i)#获取行内容
-        unitList.append(rows)
-    return unitList
+    @staticmethod
+    def create_strategy(unit):
+        ad_unit_id = unit['adUnitId']
+        start_date = unit['startDate']
+        end_date = unit['endDate']
+        duration = unit['durationInSecond']
+        report_id = unit['referId']
+        creative_group_id = CreateStrategy.get_creative_id(duration, report_id)
+        payload = {
+            "adUnitId": str(ad_unit_id),
+            "creativeGroupIds": creative_group_id,
+            "startDate": start_date,
+            "startTime": "00:00:00",
+            "endDate": end_date,
+            "endTime": "23:59:59"
+        }
 
-#设置表格样式
-def set_style(name,height,bold=False):
-    style = xlwt.XFStyle()
-    font = xlwt.Font()
-    font.name = name
-    font.bold = bold
-    font.color_index = 4
-    font.height = height
-    style.font = font
-    return style
+        url = 'http://ad-strategy-internal-preonline.fmtest.tech/v1/createAdUnitStrategy'
+        requests.post(url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
 
-#写Excel
-def write_Strategy_excel():
-    try:
-        # 通过cursor创建游标
-        cursor = global_demo.GL_connection.cursor()
-        # 创建sql 语句
-        sql = "SELECT * FROM ad_unit WHERE city_id='110000000000' AND ad_unit_status in ('WAIT','SHOW')"
-        # 执行sql语句
-        cursor.execute(sql)
-        # 获取所有记录列表
-        results = cursor.fetchall()
-    except  Exception:
-        print("查询失败")
-    # 关闭游标连接
-    cursor.close()
-#创建Excel
-    f = xlwt.Workbook()
-    sheet1 = f.add_sheet('unitStrategyInfo', cell_overwrite_ok=True)
-    row0 = ["adUnitId", "creativeGroupIds", "startDate", "startTime", "endDate", "endTime"]
-    for i in range(0, len(row0)):
-        sheet1.write(0,i,row0[i],set_style('Times New Roman',220,True))
-    for index,value in(enumerate(results)):
-        #获取该单元对应的创意组
-        ad_campaign_id=value.get("ad_campaign_id")
-        listRefer=ad_campaign_id.split("_")
-        referid=listRefer[0]
-        creative_group_id=creative_Info().get(referid)
-        #写单元信息
-        sheet1.write(index+1, 0, value.get("ad_unit_id"))
-        sheet1.write(index+1, 1, creative_group_id)
-        sheet1.write(index+1, 2, creative_Info().get("start_date"))
-        sheet1.write(index+1, 3, "00:00:00")
-        sheet1.write(index+1, 4, creative_Info().get("end_date"))
-        sheet1.write(index+1, 5, "23:59:59")
-    f.save('createStrategy.xls')
+    @staticmethod
+    def get_units_info(city_id, start_date, end_date):
+        '''查找发布期内涉及发布的单元'''
+        payload = {
+            "cityId": city_id,
+            "startDate": start_date,
+            "endDate": end_date
+        }
+        get_unit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/listByDateRange'
+        result = requests.post(get_unit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        response = result.json()
+        return response
 
-def createStrategy(unitInfo):
-    payload = {
-        "adUnitId": str(unitInfo[0]),
-        "creativeGroupIds": [unitInfo[1]],
-        "startDate": unitInfo[2],
-        "startTime": unitInfo[3],
-        "endDate": unitInfo[4],
-        "endTime": unitInfo[5]
-    }
+    @staticmethod
+    def get_creative_id(duration, report_id):
+        if duration == 15:
+            creative_id = CreateStrategy.creative_Info_15()[report_id]
+            return creative_id
+        elif duration == 30:
+            creative_id = CreateStrategy.creative_Info_30()[report_id]
+            return creative_id
 
-    url = 'http://ad-strategy-internal-preonline.fmtest.tech/v1/createAdUnitStrategy'
-    r = requests.post(url, json=payload, headers=global_demo.GL_headers, verify=False)
-    # print(r.json())
 
-unitInfo = read_excel()
+if __name__ == '__main__':
+    '''配置城市'''
+    city_id = '110000000000'
+    '''定义排播的日期'''
+    tomorrow = time_function.GetTime.get_tomorrow()
+    next_next_sunday = time_function.GetTime.get_next_next_sunday()
+    start_date = tomorrow
+    end_date = next_next_sunday
 
-write_Strategy_excel()
-for i in (unitInfo[1:]):
-    createStrategy(i)
+    '''获取需要排播的单元信息'''
+    unit_info = CreateStrategy.get_units_info(city_id, start_date, end_date)
+
+    for unit in unit_info:
+        CreateStrategy.create_strategy(unit)
