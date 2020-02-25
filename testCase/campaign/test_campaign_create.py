@@ -26,15 +26,15 @@ class CreateCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type_list = ["KA", "VACANT"]
         for campaign_type in campaign_type_list:
-            refer_id = '136381'
-            campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+            refer_id=global_demo.GL_REFER_ID1
+            campaign_name = int(round(time.time() * 1000000))
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
             ad_campaign_id = result.text
             self.assertEqual(result.status_code, 200, msg='创建计划，状态码为200则用例通过')
             '''检查接口返回信息和创建信息相同'''
             result = ad_campaign.AdCampaign.search_campaign_info(ad_campaign_id)
             self.assertEqual(result['adCampaignId'], ad_campaign_id, msg='检查计划ID，相同则用例通过')
-            self.assertEqual(result['adCampaignName'], campaign_name, msg='检查计划名称，相同则用例通过')
+            self.assertEqual(result['adCampaignName'], str(campaign_name), msg='检查计划名称，相同则用例通过')
             self.assertEqual(result['adCampaignType'], campaign_type, msg='检查计划类型，相同则用例通过')
             self.assertEqual(result['auditStatus'], 'INITIAL', msg='检查计划初始状态，相同则用例通过')
             global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -45,7 +45,7 @@ class CreateCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         refer_id = 'E-1900042'
         campaign_type = 'NONPROFIT'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         note = 'I am note'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note)
         ad_campaign_id = result.text
@@ -53,7 +53,7 @@ class CreateCampaign(unittest.TestCase):
         '''检查接口返回信息和创建信息相同'''
         result = ad_campaign.AdCampaign.search_campaign_info(ad_campaign_id)
         self.assertEqual(result['adCampaignId'], ad_campaign_id, msg='检查计划ID，相同则用例通过')
-        self.assertEqual(result['adCampaignName'], campaign_name, msg='检查计划名称，相同则用例通过')
+        self.assertEqual(result['adCampaignName'], str(campaign_name), msg='检查计划名称，相同则用例通过')
         self.assertEqual(result['adCampaignType'], campaign_type, msg='检查计划类型，相同则用例通过')
         self.assertEqual(result['auditStatus'], 'INITIAL', msg='检查计划初始状态，相同则用例通过')
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -62,8 +62,8 @@ class CreateCampaign(unittest.TestCase):
     def test_create_building_campaign_success(self):
         """创建物业计划,计划名称长度为50，创建成功"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
-        refer_id = '404'
-        campaign_type = 'BUILDING'
+        refer_id = 'P404'
+        campaign_type = 'PROPERTY'
         campaign_name = 'qwertyuiopasdfghjklzxcvbnm123456789012345678901234'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
@@ -71,7 +71,7 @@ class CreateCampaign(unittest.TestCase):
         '''检查接口返回信息和创建信息相同'''
         result = ad_campaign.AdCampaign.search_campaign_info(ad_campaign_id)
         self.assertEqual(result['adCampaignId'], ad_campaign_id, msg='检查计划ID，相同则用例通过')
-        self.assertEqual(result['adCampaignName'], campaign_name, msg='检查计划名称，相同则用例通过')
+        self.assertEqual(result['adCampaignName'], str(campaign_name), msg='检查计划名称，相同则用例通过')
         self.assertEqual(result['adCampaignType'], campaign_type, msg='检查计划类型，相同则用例通过')
         self.assertEqual(result['auditStatus'], 'AUDITED', msg='检查计划初始状态，相同则用例通过')
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -83,14 +83,14 @@ class CreateCampaign(unittest.TestCase):
         report_id_list = ["136381", "144705"]
         for refer_id in report_id_list:
             campaign_type = 'KA'
-            campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+            campaign_name = "duplicate_name"
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
             ad_campaign_id = result.text
             self.assertEqual(result.status_code, 200, msg='创建计划，状态码为200则用例通过')
             '''检查接口返回信息和创建信息相同'''
             result = ad_campaign.AdCampaign.search_campaign_info(ad_campaign_id)
             self.assertEqual(result['adCampaignId'], ad_campaign_id, msg='检查计划ID，相同则用例通过')
-            self.assertEqual(result['adCampaignName'], campaign_name, msg='检查计划名称，相同则用例通过')
+            self.assertEqual(result['adCampaignName'], str(campaign_name), msg='检查计划名称，相同则用例通过')
             self.assertEqual(result['adCampaignType'], campaign_type, msg='检查计划类型，相同则用例通过')
             self.assertEqual(result['auditStatus'], 'INITIAL', msg='检查计划初始状态，相同则用例通过')
             global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -101,7 +101,7 @@ class CreateCampaign(unittest.TestCase):
         """同报备号下创建重名计划，创建失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         for i in (range(2)):
-            refer_id = '136381'
+            refer_id=global_demo.GL_REFER_ID1
             campaign_name = 'test'
             campaign_type = 'KA'
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
@@ -121,7 +121,7 @@ class CreateCampaign(unittest.TestCase):
         campaign_type_list = ["KA", "VACANT"]
         for campaign_type in campaign_type_list:
             refer_id = '99999999999'
-            campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+            campaign_name = int(round(time.time() * 1000000))
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
             self.assertEqual(result.status_code, 500, msg='无效报备号创建计划，状态码为500则用例通过')
             text = result.json()
@@ -136,7 +136,7 @@ class CreateCampaign(unittest.TestCase):
         campaign_type_list = ["KA", "VACANT"]
         for campaign_type in campaign_type_list:
             refer_id = '170610'
-            campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+            campaign_name = int(round(time.time() * 1000000))
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
             self.assertEqual(result.status_code, 500, msg='无效报备号创建计划，状态码为500则用例通过')
             text = result.json()
@@ -151,7 +151,7 @@ class CreateCampaign(unittest.TestCase):
         campaign_type_list = ["KA", "VACANT"]
         for campaign_type in campaign_type_list:
             refer_id = '9614'
-            campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+            campaign_name = int(round(time.time() * 1000000))
             result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
             self.assertEqual(result.status_code, 500, msg='非智能屏报备号创建计划，状态码为500则用例通过')
             text = result.json()
@@ -165,7 +165,7 @@ class CreateCampaign(unittest.TestCase):
         """不传报备号创建计划，报错，创建失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type = 'KA'
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_name = ''
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         self.assertEqual(result.status_code, 400, msg='请求错误，状态码为400则用例通过')
@@ -177,7 +177,7 @@ class CreateCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type = 'KA'
         refer_id = ''
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         self.assertEqual(result.status_code, 400, msg='请求错误，状态码为400则用例通过')
         global_demo.GL_DEL_CAMPAIGN_LIST.append(result.text)
@@ -187,8 +187,8 @@ class CreateCampaign(unittest.TestCase):
         """不传计划类型，报错，创建失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type = ''
-        refer_id = '136381'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        refer_id=global_demo.GL_REFER_ID1
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         self.assertEqual(result.status_code, 400, msg='请求错误，状态码为400则用例通过')
         global_demo.GL_DEL_CAMPAIGN_LIST.append(result.text)
@@ -199,7 +199,7 @@ class CreateCampaign(unittest.TestCase):
         """计划名称长度 > 50，报错，创建失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type = 'KA'
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_name = 'qwertyuiopasdfghjklzxcvbnm1234567890123456789012341'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         self.assertEqual(result.status_code, 400, msg='请求错误，状态码为400则用例通过')
@@ -210,7 +210,7 @@ class CreateCampaign(unittest.TestCase):
         """备注长度 > 251，报错，创建失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         campaign_type = 'KA'
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         note = 'qwertyuiopasdfghjklzxcvbnm123456789012345678901234qwertyuiopasdfghjklzxcvbnm123456789012345678901234' \
                'qwertyuiopasdfghjklzxcvbnm123456789012345678901234qwertyuiopasdfghjklzxcvbnm123456789012345678901234' \
                'qwertyuiopasdfghjklzxcvbnm1234567890123456789012341'

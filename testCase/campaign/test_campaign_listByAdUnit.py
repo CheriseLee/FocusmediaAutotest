@@ -23,41 +23,18 @@ class ListUnlockCampaign(unittest.TestCase):
     def test_list_unlock_campaign_success(self):
         """查看锁位未审核计划，查询结果非空，查询成功"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
-
-        '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        new_ad_campaign_id = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(new_ad_campaign_id)
-        time.sleep(1)
-
-        '''计划下创建一个必播单元'''
-        today = datetime.date.today()
-        tomorrow = str(today + datetime.timedelta(days=1))
-        duration_in_second = 5
-        frequency = 300
-        start_date = tomorrow
-        end_date = tomorrow
-        ad_unit_type = 'GUARANTEED'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = new_ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        ad_unit_id = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
-
+        '''计划下创建一个候补意向中单元'''
+        tomorrow = time_function.GetTime.get_tomorrow()
+        result = ad_unit.AdUnit().create_ka_guaranteed_building_unit(goal_location_num=10)
+        ad_unit_id = result.json()['adUnitId']
+        ad_campaign_id= result.json()['adCampaignId']
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
         '''锁位'''
         ad_unit.AdUnit().reserve_unit(ad_unit_id)
         '''查询锁位未审核计划'''
-        initialreserved = "true"
-        urgentexpired = "false"
-        list_by_ad_unit_campaign = ad_campaign.AdCampaign().no_audit_campaign_list(start_date, end_date, initialreserved, urgentexpired)
-
+        list_by_ad_unit_campaign = ad_campaign.AdCampaign().unaudit_campaign_list(start_date=tomorrow, end_date=tomorrow, initial_reserved="true", urgent_expired="false")
         '''检查创建的计划在查询列表中'''
-        self.assertIn(new_ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
-
+        self.assertIn(ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
         '''撤销锁位'''
         ad_unit.AdUnit().revert_unit(ad_unit_id)
         '''删除单元'''
@@ -66,98 +43,50 @@ class ListUnlockCampaign(unittest.TestCase):
     def test_list__urgent_campaign_success(self):
         """查看急播过期计划，查询结果非空，查询成功"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
-
-        '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        new_ad_campaign_id = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(new_ad_campaign_id)
-        time.sleep(1)
-
         '''计划下创建一个必播单元'''
-        today = datetime.date.today()
-        tomorrow = str(today + datetime.timedelta(days=1))
-        duration_in_second = 5
-        frequency = 300
-        start_date = tomorrow
-        end_date = tomorrow
-        ad_unit_type = 'GUARANTEED'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = new_ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        ad_unit_id = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
+        result = ad_unit.AdUnit().create_ka_guaranteed_building_unit(goal_location_num=10)
+        ad_unit_id = result.json()['adUnitId']
+        ad_campaign_id = result.json()['adCampaignId']
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
 
+        start_date = time_function.GetTime.get_next_next_monday()
+        end_date = time_function.GetTime.get_next_next_monday()
         '''锁位'''
         ad_unit.AdUnit().reserve_unit(ad_unit_id)
         '''审核为急播单'''
-        contract_no = 'contract_no'
-        contract_type = 'URGENT'
-        ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='',
+        ad_campaign.AdCampaign().audit_campaign(ad_campaign_id=ad_campaign_id, contract_no= 'contract_no', contract_type= 'URGENT', brand='',
                                                          industry='', pb_content='', audit_type='')
         '''查询急播过期计划'''
-        initialreserved = "false"
-        urgentexpired = "true"
-        start_date = time_function.GetTime.get_next_next_monday()
-        end_date = time_function.GetTime.get_next_next_monday()
-        list_by_ad_unit_campaign = ad_campaign.AdCampaign().no_audit_campaign_list(start_date, end_date, initialreserved, urgentexpired)
 
+        list_by_ad_unit_campaign = ad_campaign.AdCampaign().unaudit_campaign_list(start_date, end_date, initial_reserved="false", urgent_expired="true")
         '''检查创建的计划在查询列表中'''
-        self.assertIn(new_ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
+        self.assertIn(ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
 
-        '''撤销锁位'''
+        '''解锁计划，撤销锁位，删除单元，环境恢复'''
+        result = ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
+        self.assertEqual(result.status_code, 200, msg='解锁计划成功，状态码为200则用例通过')
         ad_unit.AdUnit().revert_unit(ad_unit_id)
-        '''删除单元'''
         ad_unit.AdUnit().delete_unit(ad_unit_id)
 
     def test_list_unlock_urgent_campaign_fail(self):
         """锁位未审核false，急播过期false，查询结果为空"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
-        '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        new_ad_campaign_id = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(new_ad_campaign_id)
-        time.sleep(1)
-
         '''计划下创建一个必播单元'''
-        today = datetime.date.today()
-        tomorrow = str(today + datetime.timedelta(days=1))
-        duration_in_second = 5
-        frequency = 300
-        # start_date = tomorrow
-        # end_date = tomorrow
+        result = ad_unit.AdUnit().create_ka_guaranteed_building_unit(goal_location_num=10)
+        ad_unit_id = result.json()['adUnitId']
+        ad_campaign_id = result.json()['adCampaignId']
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
+
         start_date = time_function.GetTime.get_next_next_monday()
         end_date = time_function.GetTime.get_next_next_monday()
-        ad_unit_type = 'GUARANTEED'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = new_ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        ad_unit_id = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
-
         '''锁位'''
         ad_unit.AdUnit().reserve_unit(ad_unit_id)
         '''审核为急播单'''
-        contract_no = 'contract_no'
-        contract_type = 'URGENT'
-        ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='',
+        ad_campaign.AdCampaign().audit_campaign(ad_campaign_id=ad_campaign_id, contract_no='contract_no', contract_type='URGENT', brand='',
                                                          industry='', pb_content='', audit_type='')
         '''查询急播过期计划'''
-        initialreserved = "false"
-        urgentexpired = "false"
-        # start_date = time_function.GetTime.get_next_next_monday()
-        # end_date = time_function.GetTime.get_next_next_monday()
-        list_by_ad_unit_campaign = ad_campaign.AdCampaign().no_audit_campaign_list(start_date, end_date, initialreserved, urgentexpired)
-        print(list_by_ad_unit_campaign)
-
+        ad_campaign.AdCampaign().unaudit_campaign_list(start_date, end_date, initial_reserved="false", urgent_expired="false")
         '''撤销锁位'''
         ad_unit.AdUnit().revert_unit(ad_unit_id)
         '''删除单元'''
@@ -167,59 +96,30 @@ class ListUnlockCampaign(unittest.TestCase):
         """锁位未审核true，急播过期true，查询结果非空"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
-        '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        new_ad_campaign_id = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(new_ad_campaign_id)
-        time.sleep(1)
-
         '''计划下创建一个必播单元'''
-        today = datetime.date.today()
-        tomorrow = str(today + datetime.timedelta(days=1))
-        duration_in_second = 5
-        frequency = 300
-        # start_date = tomorrow
-        # end_date = tomorrow
-        start_date = time_function.GetTime.get_next_next_monday()
-        end_date = time_function.GetTime.get_next_next_monday()
-        ad_unit_type = 'GUARANTEED'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = new_ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        ad_unit_id = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
+        result = ad_unit.AdUnit().create_ka_guaranteed_building_unit(goal_location_num=10)
+        ad_unit_id = result.json()['adUnitId']
+        ad_campaign_id = result.json()['adCampaignId']
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
 
         '''锁位'''
         ad_unit.AdUnit().reserve_unit(ad_unit_id)
 
         '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        new_ad_campaign_id1 = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(new_ad_campaign_id1)
+        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
+                                                        campaign_name=int(round(time.time() * 1000000)),
+                                                        campaign_type='KA', note='')
+        ad_campaign_id1 = result.text
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id1)
         time.sleep(1)
         '''急播计划下创建一个候补单元'''
-        today = datetime.date.today()
-        tomorrow = str(today + datetime.timedelta(days=1))
-        duration_in_second = 5
-        frequency = 300
-        # start_date = tomorrow
-        # end_date = tomorrow
+
+        result = ad_unit.AdUnit().create_ka_candidate_suit_unit()
+        ad_unit_id1 = result.json()['adUnitId']
+        ad_campaign_id1 = result.json()['adCampaignId']
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id1)
         start_date = time_function.GetTime.get_next_next_monday()
         end_date = time_function.GetTime.get_next_next_monday()
-        ad_unit_type = 'CANDIDATE'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = new_ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        ad_unit_id1 = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
 
         '''锁位'''
         ad_unit.AdUnit().confirm_unit(ad_unit_id1)
@@ -227,18 +127,19 @@ class ListUnlockCampaign(unittest.TestCase):
         '''审核为急播单'''
         contract_no = 'contract_no'
         contract_type = 'URGENT'
-        ad_campaign.AdCampaign().audit_campaign(new_ad_campaign_id1, contract_no, contract_type, brand='',
+        ad_campaign.AdCampaign().audit_campaign(ad_campaign_id1, contract_no, contract_type, brand='',
                                                          industry='', pb_content='', audit_type='')
         '''查询锁位未审核和急播过期计划'''
-        initialreserved = "true"
-        urgentexpired = "true"
-        # start_date = time_function.GetTime.get_next_next_monday()
-        # end_date = time_function.GetTime.get_next_next_monday()
-        list_by_ad_unit_campaign = ad_campaign.AdCampaign().no_audit_campaign_list(start_date, end_date, initialreserved, urgentexpired)
+        list_by_ad_unit_campaign = ad_campaign.AdCampaign().unaudit_campaign_list(start_date, end_date, initial_reserved="true", urgent_expired="true")
         '''检查创建的计划在查询列表中'''
-        self.assertIn(new_ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
-        self.assertIn(new_ad_campaign_id1, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
-        '''撤销锁位'''
+        self.assertIn(ad_campaign_id, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
+        self.assertIn(ad_campaign_id1, list_by_ad_unit_campaign, msg='对比相等，则用例通过')
+        
+        '''解锁计划，撤销锁位，删除单元，环境恢复'''
+        result = ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
+        self.assertEqual(result.status_code, 200, msg='解锁计划成功，状态码为200则用例通过')
+        result = ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id1)
+        self.assertEqual(result.status_code, 200, msg='解锁计划成功，状态码为200则用例通过')
         ad_unit.AdUnit().revert_unit(ad_unit_id)
         ad_unit.AdUnit().revert_unit(ad_unit_id1)
         '''删除单元'''

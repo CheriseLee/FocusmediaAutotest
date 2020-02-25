@@ -142,7 +142,7 @@ class AdCampaign:
         return content
 
     @staticmethod
-    def no_audit_campaign_list(startdate, enddate, initial_reserved, urgent_expired):
+    def unaudit_campaign_list(start_date, end_date, initial_reserved, urgent_expired):
         """
         查询锁位未审核、急播过期计划
         :param startdate:
@@ -152,8 +152,8 @@ class AdCampaign:
         :return: 返回查询到的计划列表
         """
         payload = {
-            "startDate": startdate,
-            "endDate": enddate,
+            "startDate": start_date,
+            "endDate": end_date,
             # "cityId": "null",
             "initialReserved": initial_reserved,
             "urgentExpired": urgent_expired,

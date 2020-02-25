@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 import os
 from BSTestRunner import *
 import unittest
+import pytest
 
 
 def send_mail(latest_report):
@@ -72,6 +73,7 @@ def latest_report(report_dir):
 
 def test_suite():
     # 定义测试用例集
+
     dir_path = os.path.abspath('.')
     test_dir = dir_path + '\\testCase\\campaign\\'
     discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
@@ -89,9 +91,10 @@ def test_suite():
         runner.run(discover)
     f.close()
 
-    # latestReport = latest_report(report_dir)
-    # send_mail(latestReport)
+    latestReport = latest_report(report_dir)
+    send_mail(latestReport)
 
 
 if __name__ == '__main__':
-    test_suite()
+    # test_suite()
+    pytest.main(['testCase/campaign/test_campaign_list.py','--alluredir','testReport/reportallure/'])

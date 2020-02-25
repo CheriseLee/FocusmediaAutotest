@@ -22,9 +22,9 @@ class UnlockCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
         '''创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -47,6 +47,45 @@ class UnlockCampaign(unittest.TestCase):
         text = result.json()
         response_code = text["code"]
         self.assertEqual(response_code, "AdCampaignIsNull", msg='投放计划不存在')
+
+    def test_unlock_unaudit_campaign_success(self):
+        """解锁一个未审核状态的计划，解锁成功"""
+        global_demo.GL_DEL_CAMPAIGN_LIST = []
+
+        '''创建一个计划'''
+        refer_id = global_demo.GL_REFER_ID1
+        campaign_type = 'KA'
+        campaign_name = int(round(time.time() * 1000000))
+        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
+        ad_campaign_id = result.text
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
+        time.sleep(1)
+
+        '''解锁计划'''
+        result = ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
+        self.assertEqual(result.status_code, 200, msg='解锁计划成功，状态码为200则用例通过')
+
+    def test_unlock_locked_campaign_success(self):
+        """解锁一个已锁定状态的计划，解锁成功"""
+        global_demo.GL_DEL_CAMPAIGN_LIST = []
+
+        '''创建一个计划'''
+        refer_id = global_demo.GL_REFER_ID1
+        campaign_type = 'KA'
+        campaign_name = int(round(time.time() * 1000000))
+        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
+        ad_campaign_id = result.text
+        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
+        time.sleep(1)
+        '''锁定计划'''
+        result = ad_campaign.AdCampaign().lock_campaign(ad_campaign_id)
+        content = result.json()
+        self.assertEqual(result.status_code, 200, msg='锁定计划成功，状态码为200则用例通过')
+        self.assertEqual(content['success'], True, msg='锁定计划成功，锁定成功状态值为True 则用例通过')
+
+        '''解锁计划'''
+        result = ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
+        self.assertEqual(result.status_code, 200, msg='解锁计划成功，状态码为200则用例通过')
 
 
 if __name__ == '__main__':

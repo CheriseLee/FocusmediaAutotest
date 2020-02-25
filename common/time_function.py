@@ -70,5 +70,30 @@ class GetTime:
         next_next_sunday = str(next_next_sunday)
         return next_next_sunday
 
+    @staticmethod
+    def get_max_day():
+        '''未来两年52*7*2不包含今天'''
+        today = datetime.date.today()
+        max_day = today + datetime.timedelta(days=728)
+        max_day.isoformat()
+        max_day = str(max_day)
+        return max_day
 
+    @staticmethod
+    def get_bigger_than_max_day():
+        '''未来两年52*7*2 +1不包含今天'''
+        today = datetime.date.today()
+        bigger_than_max_day = today + datetime.timedelta(days=729)
+        bigger_than_max_day.isoformat()
+        bigger_than_max_day = str(bigger_than_max_day)
+        return bigger_than_max_day
+
+    @staticmethod
+    def get_yesterday():
+        today = datetime.date.today()
+        yesterday = today + datetime.timedelta(days=-1)
+        yesterday.isoformat()
+        yesterday = str(yesterday)
+        return yesterday
+# print(GetTime.get_yesterday())
 

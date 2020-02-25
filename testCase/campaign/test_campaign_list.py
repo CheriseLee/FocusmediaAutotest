@@ -9,7 +9,7 @@ import operator
 """
 
 
-class AuditCampaign(unittest.TestCase):
+class ListCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -28,13 +28,15 @@ class AuditCampaign(unittest.TestCase):
             search_campaign_list = []
             for key in search_result:
                 search_campaign_list.append(key['ad_campaign_id'])
-            global_demo.connection.commit()
+            global_demo.GL_CONNECTION.commit()
         except Exception as e:
-            global_demo.connection.rollback()
+            global_demo.GL_CONNECTION.rollback()
 
         '''通过接口查询最近的10个计划ID'''
         result = ad_campaign.AdCampaign.list_campaign()
         '''比较两个列表是否相等'''
+        search_campaign_list.sort()
+        result.sort()
         is_equal = operator.eq(search_campaign_list, result)
 
         self.assertEqual(is_equal, True, msg='对比相等，则用例通过')

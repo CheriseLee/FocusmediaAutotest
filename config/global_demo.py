@@ -1,5 +1,6 @@
 import pymysql.cursors
 import get_token
+import requests
 
 
 """
@@ -7,79 +8,286 @@ import get_token
 @lihuanhuan@focusmedia.cn
 """
 
+def pre_cn():
+    global GL_TOKEN
+    GL_TOKEN = get_token.get_token()
+    """
+    定义头文件为全局变量
+    """
+    headers = {
+        'Authorization': GL_TOKEN,
+        'Content-Type': 'application/json',
+        'Origin': 'https://ad-preonline.fmtest.tech',
+        'Referer': 'https://ad-preonline.fmtest.tech/',
+        'Sec-Fetch-Mode': 'cors',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+    }
+    global GL_HEADERS
+    GL_HEADERS = headers
 
-global GL_TOKEN
-GL_TOKEN = get_token.get_token()
-"""
-定义头文件为全局变量
-"""
-headers = {
-    'Authorization': GL_TOKEN,
-    'Content-Type': 'application/json',
-    'Origin': 'https://ad-preonline.fmtest.tech',
-    'Referer': 'https://ad-preonline.fmtest.tech/',
-    'Sec-Fetch-Mode': 'cors',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
-}
-global GL_HEADERS
-GL_HEADERS = headers
+    """
+    连接Pre数据库，定义数据库为全局变量
+    """
+    connection = pymysql.connect(
+        host='rm-uf636zdzhj6ka5q8f.mysql.rds.aliyuncs.com',
+        port=3306,
+        user='liuwei',
+        passwd='Mhxzkhl@123',
+        db='kuma_ad_group',
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    global GL_CONNECTION
+    GL_CONNECTION = connection
+
+    """
+    计划、单元相关变量定义
+    """
+    '''定义ad_group的Base URL'''
+    global GL_URL_AD_GROUP
+    GL_URL_AD_GROUP = 'http://ad-group-internal-preonline.fmtest.tech'
+
+    '''定义城市ID,测试使用西安市'''
+    global GL_CITY_ID
+    GL_CITY_ID = '310000000000'
+
+    global GL_BUILDING_IDS
+    GL_BUILDING_IDS = []
+
+    global GL_REFER_ID1
+    GL_REFER_ID1 = '186073'
+
+    global GL_REFER_ID2
+    GL_REFER_ID2 = '191738'
+
+    global GL_DSPID1
+    GL_DSPID1 = '29f2678825c447aebc2667e5aeed879d'
+
+    global GL_DSPID2
+    GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
+
+    '''创建的计划最终要删除，定义一个全局的变量'''
+    global GL_DEL_CAMPAIGN_LIST
+    GL_DEL_CAMPAIGN_LIST = []
+
+    """
+    定义ad_cycle的Base URL
+    """
+    global GL_URL_AD_CYCLE
+    GL_URL_AD_CYCLE = 'http://ad-cycle-internal-preonline.fmtest.tech'
+
+def sandbox_cn():
+    global GL_TOKEN
+    GL_TOKEN = get_token.get_token()
+    """
+    定义头文件为全局变量
+    """
+    headers = {
+        'Authorization': GL_TOKEN,
+        'Content-Type': 'application/json',
+        'Origin': 'https://ad-preonline.fmtest.tech',
+        'Referer': 'https://ad-preonline.fmtest.tech/',
+        'Sec-Fetch-Mode': 'cors',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+    }
+    global GL_HEADERS
+    GL_HEADERS = headers
+
+    """
+    连接sandbox-cn数据库，定义数据库为全局变量
+    """
+    connection = pymysql.connect(
+        host='rm-uf6t3483v2xbdo38y.mysql.rds.aliyuncs.com',
+        port=3306,
+        user='root',
+        passwd='Mhxzkhl@321',
+        db='kuma_ad_group',
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    global GL_CONNECTION
+    GL_CONNECTION = connection
+
+    """
+    计划、单元相关变量定义
+    """
+    '''定义ad_group的Base URL'''
+    global GL_URL_AD_GROUP
+    GL_URL_AD_GROUP = 'http://ad-group-internal.fmtest.tech'
+
+    '''定义ad_strategy的Base URL'''
+    global GL_URL_AD_STRATEGY
+    GL_URL_AD_STRATEGY = 'http://ad-strategy-internal.fmtest.tech'
+
+    '''定义城市ID,测试使用中山市'''
+    global GL_CITY_ID
+    GL_CITY_ID = '442000000000'
+
+    '''中山市A\B套套装编码'''
+    global GL_SUIT_CODES
+    GL_SUIT_CODES = ['EA300101','EA300148','EA300116','EA300163']
+
+    global GL_BUILDING_IDS
+    GL_BUILDING_IDS = ['5009136','5009135','5009134']
+
+    global GL_REFER_ID1
+    GL_REFER_ID1= '136730'
+
+    global GL_REFER_ID2
+    GL_REFER_ID2 = '136317'
+
+    global GL_NONPROFIT_ID
+    GL_NONPROFIT_ID= 'E-1800265'
+
+    global GL_PROPERTY_ADMINID
+    GL_PROPERTY_ADMINID = 'P3029339'
+
+    global GL_PROPERTY_LOCATION_IDS
+    GL_PROPERTY_LOCATION_IDS = ["8516112","8516113","8516114","8516115","8516116","8516118","8516130","8516090","8516126",
+                                "8516096","8516097","8516099","8516101","8516105","8516125","8516128","8516087","8516093",
+                                "8516092","8516107","8516108","8516109","8516120","8516086","8516088","8516102","8516123",
+                                "8516094","8516110","8516111","8516117","8516103","8516095","8516119","8516104","8516122",
+                                "8516129","8516089","8516091","8516098","8516100","8516106","8516121","8516124"]
+    global GL_DSPID1
+    GL_DSPID1 = '29f2678825c447aebc2667e5aeed879d'
+
+    global GL_DSPID2
+    GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
+    """
+    定义ad_cycle的Base URL
+    """
+    global GL_URL_AD_CYCLE
+    GL_URL_AD_CYCLE = 'http://ad-cycle-internal.fmtest.tech'
+
+def sandbox_sg():
+    global GL_TOKEN
+    GL_TOKEN = get_token.get_token()
+    """
+    定义头文件为全局变量
+    """
+    headers = {
+        'Authorization': GL_TOKEN,
+        'Content-Type': 'application/json',
+        'Origin': 'https://ad-preonline.fmtest.tech',
+        'Referer': 'https://ad-preonline.fmtest.tech/',
+        'Sec-Fetch-Mode': 'cors',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+    }
+    global GL_HEADERS
+    GL_HEADERS = headers
+
+    """
+    连接Pre数据库，定义数据库为全局变量
+    """
+    connection = pymysql.connect(
+        host='rm-t4n487v9g8n1d1752.mysql.singapore.rds.aliyuncs.com',
+        port=3306,
+        user='root',
+        passwd='Mhxzkhl@123',
+        db='kuma_ad_group',
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    global GL_CONNECTION
+    GL_CONNECTION = connection
+
+    """
+    计划、单元相关变量定义
+    """
+    '''定义ad_group的Base URL'''
+    global GL_URL_AD_GROUP
+    GL_URL_AD_GROUP = 'http://ad-group.sg.internal.fmtest.tech'
+
+    '''定义城市ID,测试使用新家坡'''
+    global GL_CITY_ID
+    GL_CITY_ID = '5929'
+
+    global GL_BUILDING_IDS
+    GL_BUILDING_IDS = []
+
+    global GL_REFER_ID1
+    GL_REFER_ID1= '100006'
+
+    global GL_REFER_ID2
+    GL_REFER_ID2 = '100007'
+
+    global GL_DSPID1
+    GL_DSPID1 = '29f2678825c447aebc2667e5aeed879d'
+
+    global GL_DSPID2
+    GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
+
+    '''创建的计划最终要删除，定义一个全局的变量'''
+    global GL_DEL_CAMPAIGN_LIST
+    GL_DEL_CAMPAIGN_LIST = []
+
+    """
+    定义ad_cycle的Base URL
+    """
+    global GL_URL_AD_CYCLE
+    GL_URL_AD_CYCLE = 'http://ad-cycle.sg.internal.fmtest.tech'
+
+def get_initial_environment():
+    '''获取当前及下个发布周期ID'''
+    global GL_CUR_AD_CYCLE_ID
+    global GL_NEXT_AD_CYCLE_ID
+    get_adCycleId = GL_URL_AD_CYCLE + '/v1/adCycle?limit=2'
+    result = requests.get(get_adCycleId, headers=GL_HEADERS, verify=False)
+    GL_CUR_AD_CYCLE_ID = result.json()[1]["id"]
+    GL_NEXT_AD_CYCLE_ID = result.json()[0]["id"]
+
+    '''解除当前发布期和下个发布期的发布锁'''
+    delete_adCycleLock = GL_URL_AD_CYCLE + '/v1/adCycle/lock/' + str(GL_CITY_ID) + GL_CUR_AD_CYCLE_ID
+    result = requests.delete(delete_adCycleLock, headers=GL_HEADERS, verify=False)
+
+    '''获取当前城市下所有的待发布、发布中单元，取消或终止掉'''
+    cursor = GL_CONNECTION.cursor()
+    '''查找待发布、发布中单元所在的计划，取消审核'''
+    sql="SELECT ad_campaign_id FROM ad_unit WHERE city_id='%s' and ad_unit_status in('WAIT','SHOW') GROUP BY ad_campaign_id"%GL_CITY_ID
+    '''执行sql语句，避免sql执行失败产生死锁'''
+    try:
+        cursor.execute(sql)
+        campaignidList=cursor.fetchall()
+        GL_CONNECTION.commit()
+    except Exception as e:
+        GL_CONNECTION.rollback()
 
 
-"""
-连接Pre数据库，定义数据库为全局变量
-"""
-connection = pymysql.connect(
-    host='rm-uf636zdzhj6ka5q8f.mysql.rds.aliyuncs.com',
-    port=3306,
-    user='liuwei',
-    passwd='Mhxzkhl@123',
-    db='kuma_ad_group',
-    charset='utf8mb4',
-    cursorclass=pymysql.cursors.DictCursor
-)
-global GL_CONNECTION
-GL_CONNECTION = connection
+    '''解锁所有涉及的计划'''
+    for key in campaignidList:
+        unlock_campaign = GL_URL_AD_GROUP + '/v1/ad/campaign/unLock/' + key['ad_campaign_id']
+        requests.post(unlock_campaign, headers=GL_HEADERS, verify=False)
 
+    '''查找待发布单元并取消'''
+    sql = "SELECT ad_unit_id FROM ad_unit WHERE city_id='%s' and ad_unit_status in('WAIT')" % GL_CITY_ID
+    try:
+        cursor.execute(sql)
+        adunitidList = cursor.fetchall()
+        GL_CONNECTION.commit()
+    except Exception as e:
+        GL_CONNECTION.rollback()
 
-"""
-计划、单元相关变量定义
-"""
-'''定义ad_group的Base URL'''
-global GL_URL_AD_GROUP
-GL_URL_AD_GROUP = 'http://ad-group-internal-preonline.fmtest.tech'
+    for key in adunitidList:
+        cancel_unit = GL_URL_AD_GROUP + '/v1/ad/unit/cancel/' + key['ad_unit_id']
+        requests.post(cancel_unit, headers=GL_HEADERS, verify=False)
 
-'''定义城市ID,测试使用西安市'''
-global GL_CITY_ID
-GL_CITY_ID = '610100000000'
+    '''查找发布中单元并终止'''
+    sql = "SELECT ad_unit_id FROM ad_unit WHERE city_id='%s' and ad_unit_status in('SHOW')" % GL_CITY_ID
+    try:
+        cursor.execute(sql)
+        adunitidList = cursor.fetchall()
+        GL_CONNECTION.commit()
+    except Exception as e:
+        GL_CONNECTION.rollback()
 
-global GL_BUILDING_IDS
-GL_BUILDING_IDS = []
+    for key in adunitidList:
+        payload ={
+            "adUnitId": key
+        }
+        terminate_unit = GL_URL_AD_GROUP + '/v1/ad/unit/terminate'
+        requests.post(terminate_unit, json=payload, headers=GL_HEADERS, verify=False)
 
-global GL_REPORT_ID1_191738
-GL_REPORT_ID1_191738 = '191738'
+sandbox_cn()
+# pre_cn()
 
-global GL_REPORT_ID2_186073
-GL_REPORT_ID2_186073 = '186073'
-
-global GL_DSPID1
-GL_DSPID1 = '186073'
-
-'''创建的计划最终要删除，定义一个全局的变量'''
-global GL_DEL_CAMPAIGN_LIST
-GL_DEL_CAMPAIGN_LIST = []
-
-
-"""
-定义ad_cycle的Base URL
-"""
-global GL_URL_AD_CYCLE
-GL_URL_AD_CYCLE = 'http://ad-cycle-internal-preonline.fmtest.tech'
-
-"""给当前发布期和下个发布期的ID赋值，运行前必须检查修改ad_cycle_id"""
-global GL_CUR_AD_CYCLE_ID
-global GL_NEXT_AD_CYCLE_ID
-GL_CUR_AD_CYCLE_ID = '2019W44'
-GL_NEXT_AD_CYCLE_ID = '2019W45'
-
-
-
+get_initial_environment()

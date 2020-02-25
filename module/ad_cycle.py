@@ -60,7 +60,7 @@ class AdCycleLock:
         如果获取城市发布锁的结果为false,直接返回
         如果获取城市发布锁的结果为true，删除发布锁，删除时对删除结果校验，删除成功继续，删除失败，返回false
         """
-        if not result:
+        if len(result)==0:
             return True
         else:
             for key in result:

@@ -22,8 +22,8 @@ class EditCampaign(unittest.TestCase):
         """不修改计划的任何信息，允许修改"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        refer_id=global_demo.GL_REFER_ID1
+        campaign_name = int(round(time.time() * 1000000))
         campaign_type = 'KA'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
@@ -38,8 +38,8 @@ class EditCampaign(unittest.TestCase):
         """修改计划的名称、备注和之前不同，允许修改"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        refer_id=global_demo.GL_REFER_ID1
+        campaign_name = int(round(time.time() * 1000000))
         campaign_type = 'KA'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
@@ -54,7 +54,7 @@ class EditCampaign(unittest.TestCase):
         """修改计划的名称和报备号下其他计划重复，修改失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建第一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_name = 'lihhtest'
         campaign_type = 'KA'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
@@ -62,7 +62,7 @@ class EditCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
 
         '''创建第二个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_name1 = 'lihhtest1'
         campaign_type = 'KA'
         result1 = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name1, campaign_type, note='')
@@ -88,7 +88,7 @@ class EditCampaign(unittest.TestCase):
         """修改计划的名称为空，修改失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建第一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_name = 'lihhtest'
         campaign_type = 'KA'
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')

@@ -23,9 +23,9 @@ class AuditCampaign(unittest.TestCase):
         """ 计划下无任何单元，审核为合同号，审核成功"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
+        refer_id = global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
 
@@ -48,9 +48,9 @@ class AuditCampaign(unittest.TestCase):
         """ 计划下无任何单元，审核为急播单号，审核成功，检查过期日期为下周日"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         ''' 创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
 
@@ -72,57 +72,40 @@ class AuditCampaign(unittest.TestCase):
         time.sleep(1)
 
     def test_audit_wait_campaign_success(self):
-        """计划下有待发布候补单元，审核成功"""
+        """计划下有WAIT、SHOW、CANCELLED、FINISH、TERMINATED状态的单元，可以审核"""
+        unit_status_list = ['WAIT', 'SHOW', 'CANCELLED', 'FINISH', 'TERMINATED']
         global_demo.GL_DEL_CAMPAIGN_LIST = []
+        for unit_status in unit_status_list:
+            '''创建一个计划'''
+            refer_id=global_demo.GL_REFER_ID1
+            campaign_type = 'KA'
+            campaign_name = int(round(time.time() * 1000000))
+            result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
+            ad_campaign_id = result.text
+            global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
+            time.sleep(1)
 
-        ''' 创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        ad_campaign_id = result.text
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
-        time.sleep(1)
+            '''在计划下插入一个候补单元'''
+            ad_unit_id = ad_unit.AdUnit.insert_CANDIDATE_unit_toDB(ad_campaign_id, unit_status)
+            '''审核计划,审核成功'''
+            contract_no = 'contract_no'
+            contract_type = 'URGENT'
+            result = ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
+            content = result.json()
+            self.assertEqual(result.status_code, 200, msg='审核计划成功，状态码为200')
+            self.assertEqual(content['success'], True, msg='审核计划成功，审核成功状态值为true 则用例通过')
+            '''删除插入的候补单元'''
+            ad_unit.AdUnit.delete_CANDIDATE_unit_fromDB(ad_unit_id)
 
-        '''在计划下创建一个候补单元'''
-        tomorrow = time_function.GetTime.get_tomorrow()
-        duration_in_second = 5
-        frequency = 300
-        start_date = tomorrow
-        end_date = tomorrow
-        ad_unit_type = 'CANDIDATE'
-        dsp = True
-        suit_codes = ['EA300101']
-        ad_campaign_id = ad_campaign_id
-        dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
-        target_type = 'SUIT'
-        result = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type,
-                                              dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
-        ad_unit_id = result['adUnitId']
-        '''确认单元'''
-        ad_unit.AdUnit.confirm_unit(ad_unit_id)
-        '''审核计划,审核成功'''
-        contract_no = 'contract_no'
-        contract_type = 'URGENT'
-        result = ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
-        content = result.json()
-        self.assertEqual(result.status_code, 200, msg='审核计划成功，状态码为200')
-        self.assertEqual(content['success'], True, msg='审核计划成功，审核成功状态值为true 则用例通过')
-
-        '''环境恢复：解锁计划、撤销锁位、并删除单元'''
-        ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
-        ad_unit.AdUnit.revert_unit(ad_unit_id)
-        del_result = ad_unit.AdUnit.delete_unit(ad_unit_id)
-        self.assertEqual(del_result, True, msg='单元删除成功')
 
     def test_audit_pending_campaign_fail(self):
         """计划下有意向中单元，审核失败"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
         ''' 创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -135,14 +118,14 @@ class AuditCampaign(unittest.TestCase):
         start_date = tomorrow
         end_date = tomorrow
         ad_unit_type = 'GUARANTEED'
-        dsp = True
-        suit_codes = ['EA300101']
+        dsp = False
+        suit_codes=global_demo.GL_SUIT_CODES[0]
         ad_campaign_id = ad_campaign_id
         dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
         target_type = 'SUIT'
         result = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type,
                                                   dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
-        ad_unit_id = result['adUnitId']
+        ad_unit_id = result.json()['adUnitId']
         '''审核计划,审核失败'''
         contract_no = 'contract_no'
         contract_type = 'URGENT'
@@ -158,9 +141,9 @@ class AuditCampaign(unittest.TestCase):
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
         ''' 创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
@@ -173,14 +156,14 @@ class AuditCampaign(unittest.TestCase):
         start_date = tomorrow
         end_date = tomorrow
         ad_unit_type = 'CANDIDATE'
-        dsp = True
-        suit_codes = ['EA300101']
+        dsp = False
+        suit_codes=global_demo.GL_SUIT_CODES[0]
         ad_campaign_id = ad_campaign_id
         dsp_id = '603fe4897926451ca30e4a2fa8c68ee8'
         target_type = 'SUIT'
         result = ad_unit.AdUnit().create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type,
                                                   dsp, suit_codes, ad_campaign_id, dsp_id, target_type)
-        ad_unit_id = result['adUnitId']
+        ad_unit_id = result.json()['adUnitId']
         '''确认单元'''
         ad_unit.AdUnit.confirm_unit(ad_unit_id)
         '''获取单元的publishVersion'''
@@ -296,9 +279,9 @@ class AuditCampaign(unittest.TestCase):
         """ 合同号为空，审核失败，目前报错InternalServerError"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
 
@@ -318,9 +301,9 @@ class AuditCampaign(unittest.TestCase):
         """ 审核类型为空，审核失败，目前报错InternalServerError"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
 
@@ -340,9 +323,9 @@ class AuditCampaign(unittest.TestCase):
         """ 审核类型不在ENUM(CONTRACT_URGENT)内，审核失败，目前报错InternalServerError"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建一个计划'''
-        refer_id = '136381'
+        refer_id=global_demo.GL_REFER_ID1
         campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
+        campaign_name = int(round(time.time() * 1000000))
         result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
         ad_campaign_id = result.text
 
@@ -353,28 +336,6 @@ class AuditCampaign(unittest.TestCase):
                                                          industry='', pb_content='', audit_type='')
         content = result.json()
         self.assertEqual(result.status_code, 400, msg='审核计划失败，状态码为500则用例通过')
-        self.assertNotEqual(content['code'], 'InternalServerError', msg='审核计划失败，则用例通过')
-
-        global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
-        time.sleep(1)
-
-    """各参数输入长度测试"""
-    def test_audit_campaign_contract_len33_fail(self):
-        """ 合同号长度为33，审核失败，目前报错InternalServerError"""
-        global_demo.GL_DEL_CAMPAIGN_LIST = []
-        '''创建一个计划'''
-        refer_id = '136381'
-        campaign_type = 'KA'
-        campaign_name = time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
-        ad_campaign_id = result.text
-
-        '''审核计划'''
-        contract_no = '123456789012345678901234567890123'
-        contract_type = 'CONTRACT'
-        result = ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
-        content = result.json()
-        self.assertEqual(result.status_code, 500, msg='审核计划失败，状态码为500则用例通过')
         self.assertNotEqual(content['code'], 'InternalServerError', msg='审核计划失败，则用例通过')
 
         global_demo.GL_DEL_CAMPAIGN_LIST.append(ad_campaign_id)
