@@ -19,7 +19,7 @@ def get_token():
         'username': 'lihuanhuan@focusmedia.cn',
         'password':  'lihh0727'
     }
-    baseURL = 'http://auth-server-internal-preonline.fmtest.tech'
+    baseURL = 'http://auth-server.preonline.internal.fmtest.tech'
     loginURL = baseURL+'/oauth/token'
     result = requests.post(loginURL, data=datas, auth=auth, headers=token_header, verify=False)
     unit = result.json()

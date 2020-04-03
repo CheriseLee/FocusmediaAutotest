@@ -71,7 +71,7 @@ def latest_report(report_dir):
     return file
 
 
-def test_suite():
+def suite():
     # 定义测试用例集
 
     dir_path = os.path.abspath('.')
@@ -96,5 +96,9 @@ def test_suite():
 
 
 if __name__ == '__main__':
-    # test_suite()
-    pytest.main(['testCase/campaign/test_campaign_list.py','--alluredir','testReport/reportallure/'])
+
+    pytest.main()
+# pytest.main(['testCase/campaign/test_campaign_list.py','--alluredir','testReport/reportallure/'])
+ # 执行命令 allure generate ./temp -o ./report --clean ，生成测试报告
+ #    os.system('allure generate testReport/reportallure -o ./report --clean')
+ #    pytest

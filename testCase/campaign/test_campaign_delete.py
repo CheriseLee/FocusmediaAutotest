@@ -1,7 +1,7 @@
 import global_demo
 import unittest
 import time
-import os
+import pytest
 import ad_campaign
 import ad_unit
 """
@@ -11,7 +11,7 @@ import ad_unit
 """
 
 
-class DelCampaign(unittest.TestCase):
+class TestDelCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -65,11 +65,6 @@ class DelCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    pytest.main()
 
 

@@ -3,7 +3,7 @@ import unittest
 import ad_campaign
 import global_demo
 import time_function
-import time
+import pytest
 import os
 
 """
@@ -11,7 +11,7 @@ import os
 @lihuanhuan@focusmedia.cn
 """
 
-class CreateUnit(unittest.TestCase):
+class TestCreateUnit(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -574,9 +574,4 @@ class CreateUnit(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    pytest.main()

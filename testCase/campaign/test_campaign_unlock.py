@@ -1,7 +1,7 @@
 import global_demo
 import unittest
 import time
-import os
+import pytest
 import ad_campaign
 """
 解锁计划，仅给计划解锁，不涉及其他字段处理
@@ -9,7 +9,7 @@ import ad_campaign
 """
 
 
-class UnlockCampaign(unittest.TestCase):
+class TestUnlockCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -89,19 +89,12 @@ class UnlockCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # 构造测试集
-    # discover = unittest.TestSuite()
-    # discover.addTest(createCampaign("test_createKaVacantCampaign_success"))
-    # print(discover)
+    # pytest.main('-x')
 
-    # 按方法名构造用例集
-    # 定义测试用例集
+    #指定某个测试类
+    # pytest.main('TestUnlockCampaign')
 
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    #指定某个测试方法
+    pytest.main('-q test_campaign_list.py')
 
 

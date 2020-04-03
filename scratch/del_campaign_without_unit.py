@@ -11,12 +11,12 @@ def del_campaign_without_unit():
     try:
         cursor.execute(sql)
         ad_campaign_list = cursor.fetchall()
-        global_demo.connection.commit()
+        global_demo.GL_CONNECTION.commit()
     except Exception as e:
-        global_demo.connection.rollback()
+        global_demo.GL_CONNECTION.rollback()
     need_del_list = []
     n = 10000
-    print(ad_campaign_list)
+    # print(ad_campaign_list)
     for key in ad_campaign_list:
         payload = {
             "adCampaignIdList": [key['ad_campaign_id']],
@@ -35,9 +35,9 @@ def del_campaign_without_unit():
         '''执行sql语句，避免sql执行失败产生死锁'''
         try:
             cursor.execute(sql)
-            global_demo.connection.commit()
+            global_demo.GL_CONNECTION.commit()
         except Exception as e:
-            global_demo.connection.rollback()
+            global_demo.GL_CONNECTION.rollback()
 
 del_campaign_without_unit()
 

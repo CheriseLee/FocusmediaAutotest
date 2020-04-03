@@ -5,13 +5,14 @@ import os
 import ad_campaign
 import ad_unit
 import time_function
+import pytest
 """
 锁定计划，仅给计划加锁，不涉及其他字段处理
 @lihuanhuan@focusmedia.cn
 """
 
 
-class LockCampaign(unittest.TestCase):
+class TestLockCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -115,13 +116,5 @@ class LockCampaign(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    # 定义测试用例集
-
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
-
+    pytest.main()
 

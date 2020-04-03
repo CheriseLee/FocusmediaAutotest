@@ -33,6 +33,8 @@ class AdCampaign:
             "referId": refer_id,
             "adCampaignName": campaign_name,
             "adCampaignType": campaign_type,
+            "productName": "SMART_SCREEN",
+            "source": "CONSOLE",
             "note": note
         }
         create_campaign = global_demo.GL_URL_AD_GROUP + '/v1/ad/campaign/create'
@@ -157,6 +159,7 @@ class AdCampaign:
             # "cityId": "null",
             "initialReserved": initial_reserved,
             "urgentExpired": urgent_expired,
+            "productName": "SMART_SCREEN",
             "pageNo": 1,
             "pageSize": 1000
         }

@@ -1,10 +1,9 @@
 import global_demo
 import unittest
 import time
-import os
+import pytest
 import ad_campaign
 import ad_unit
-import datetime
 import time_function
 """
 查询锁位未审核，急播过期计划
@@ -12,7 +11,7 @@ import time_function
 """
 
 
-class ListUnlockCampaign(unittest.TestCase):
+class TestListUnlockCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -148,19 +147,6 @@ class ListUnlockCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # 构造测试集
-    # discover = unittest.TestSuite()
-    # discover.addTest(createCampaign("test_createKaVacantCampaign_success"))
-    # print(discover)
-
-    # 按方法名构造用例集
-    # 定义测试用例集
-
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    pytest.main()
 
 

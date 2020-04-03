@@ -3,13 +3,14 @@ import unittest
 import os
 import ad_campaign
 import operator
+import pytest
 """
 按照创建时间，查询最近的10个计划（工作台左侧）
 @lihuanhuan@focusmedia.cn
 """
 
 
-class ListCampaign(unittest.TestCase):
+class TestListCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -43,19 +44,6 @@ class ListCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # 构造测试集
-    # discover = unittest.TestSuite()
-    # discover.addTest(createCampaign("test_createKaVacantCampaign_success"))
-    # print(discover)
-
-    #按方法名构造用例集
-    # 定义测试用例集
-
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    #执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    pytest.main()
 
 

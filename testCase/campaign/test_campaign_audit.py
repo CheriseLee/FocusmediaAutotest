@@ -5,13 +5,14 @@ import os
 import ad_campaign
 import ad_unit
 import time_function
+import pytest
 """
 审核计划，计划下有意向中单元时，审核失败
 @lihuanhuan@focusmedia.cn
 """
 
 
-class AuditCampaign(unittest.TestCase):
+class TestAuditCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -136,8 +137,8 @@ class AuditCampaign(unittest.TestCase):
         self.assertEqual(content['success'], False, msg='审核计划失败，审核成功状态值为false 则用例通过')
         ad_unit.AdUnit.delete_unit(ad_unit_id)
 
-    def test_publish_version_audit_campaign_success(self):
-        """加计划审核锁，计划下单元版本号publishVersion的测试"""
+    def del_test_unit_version_audit_campaign_success(self):
+        """接口返回值不返回version，暂不测试加计划审核锁，计划下单元版本号version的测试,审核计划时，计划的任何一个字段值发生变化，计划下单元version+1，否则version保持不变"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
 
         ''' 创建一个计划'''
@@ -166,9 +167,9 @@ class AuditCampaign(unittest.TestCase):
         ad_unit_id = result.json()['adUnitId']
         '''确认单元'''
         ad_unit.AdUnit.confirm_unit(ad_unit_id)
-        '''获取单元的publishVersion'''
+        '''获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        publish_version = result['publishVersion']
+        version = result['version']
 
         '''1：审核计划类型为合同,审核成功，检查单元版本号+1'''
         contract_no = 'contract_no'
@@ -176,10 +177,10 @@ class AuditCampaign(unittest.TestCase):
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
         '''再次获取单元的publishVersion'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version + 1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version + 1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''2: 不解锁，再次审核计划，合同信息无任何变化，审核成功，检查单元版本号不变'''
         contract_no = 'contract_no'
@@ -187,43 +188,43 @@ class AuditCampaign(unittest.TestCase):
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
         '''再次获取单元的publishVersion'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号不变'''
-        self.assertEqual(new_publish_version, publish_version, msg='审核计划成功，状态码为200')
+        self.assertEqual(new_version, version, msg='审核计划成功，状态码为200')
 
         '''3: 不解锁，再次审核计划，修改合同号，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
         contract_type = 'CONTRACT'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version+1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version+1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''4: 不解锁，再次审核计划，修改合同类型为急播单，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
         contract_type = 'URGENT'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand='', industry='', pb_content='', audit_type='')
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version+1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version+1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''5: 不解锁，再次审核计划，修改brand，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
         contract_type = 'CONTRACT'
         brand = 'test1'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand, industry='', pb_content='', audit_type='')
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version+1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version+1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''6: 不解锁，再次审核计划，修改industry，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
@@ -231,12 +232,12 @@ class AuditCampaign(unittest.TestCase):
         brand = 'brand'
         industry = 'industry'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand, industry, pb_content='', audit_type='')
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version+1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version+1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''7: 不解锁，再次审核计划，修改pb_content，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
@@ -246,12 +247,12 @@ class AuditCampaign(unittest.TestCase):
         pb_content = 'pb_content'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand, industry,
                                                 pb_content, audit_type='')
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version + 1, msg='审核计划成功，状态码为200')
-        publish_version = new_publish_version
+        self.assertEqual(new_version, version + 1, msg='审核计划成功，状态码为200')
+        version = new_version
 
         '''8: 不解锁，再次审核计划，修改audit_type，审核成功，检查单元版本号+1'''
         contract_no = 'contract_no1'
@@ -262,11 +263,11 @@ class AuditCampaign(unittest.TestCase):
         audit_type = 'audit_type'
         ad_campaign.AdCampaign().audit_campaign(ad_campaign_id, contract_no, contract_type, brand, industry,
                                                 pb_content, audit_type)
-        '''再次获取单元的publishVersion'''
+        '''再次获取单元的version'''
         result = ad_unit.AdUnit.get_unit_info(ad_unit_id)
-        new_publish_version = result['publishVersion']
+        new_version = result['version']
         '''检查版本号+1'''
-        self.assertEqual(new_publish_version, publish_version + 1, msg='审核计划成功，状态码为200')
+        self.assertEqual(new_version, version + 1, msg='审核计划成功，状态码为200')
 
         '''环境恢复：解锁计划、撤销锁位、并删除单元'''
         ad_campaign.AdCampaign().unlock_campaign(ad_campaign_id)
@@ -343,19 +344,7 @@ class AuditCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # 构造测试集
-    # discover = unittest.TestSuite()
-    # discover.addTest(createCampaign("test_createKaVacantCampaign_success"))
-    # print(discover)
+    pytest.main()
 
-    # 按方法名构造用例集
-    # 定义测试用例集
-
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
 
 

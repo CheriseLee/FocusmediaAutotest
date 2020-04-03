@@ -45,14 +45,18 @@ def pre_cn():
     """
     '''定义ad_group的Base URL'''
     global GL_URL_AD_GROUP
-    GL_URL_AD_GROUP = 'http://ad-group-internal-preonline.fmtest.tech'
+    GL_URL_AD_GROUP = 'http://ad-group.preonline.internal.fmtest.tech'
 
-    '''定义城市ID,测试使用西安市'''
+    '''定义城市ID,测试使用中山市'''
     global GL_CITY_ID
-    GL_CITY_ID = '310000000000'
+    GL_CITY_ID = '442000000000'
+
+    '''中山市A\B套套装编码'''
+    global GL_SUIT_CODES
+    GL_SUIT_CODES = ['EA300101', 'EA300148', 'EA300116', 'EA300163']
 
     global GL_BUILDING_IDS
-    GL_BUILDING_IDS = []
+    GL_BUILDING_IDS = ['5009136', '5009135', '5009134']
 
     global GL_REFER_ID1
     GL_REFER_ID1 = '186073'
@@ -66,6 +70,19 @@ def pre_cn():
     global GL_DSPID2
     GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
 
+    global GL_NONPROFIT_ID
+    GL_NONPROFIT_ID= 'E-1800265'
+
+    global GL_PROPERTY_ADMINID
+    GL_PROPERTY_ADMINID = 'P3029339'
+
+    global GL_PROPERTY_LOCATION_IDS
+    GL_PROPERTY_LOCATION_IDS = ["8516112","8516113","8516114","8516115","8516116","8516118","8516130","8516090","8516126",
+                                "8516096","8516097","8516099","8516101","8516105","8516125","8516128","8516087","8516093",
+                                "8516092","8516107","8516108","8516109","8516120","8516086","8516088","8516102","8516123",
+                                "8516094","8516110","8516111","8516117","8516103","8516095","8516119","8516104","8516122",
+                                "8516129","8516089","8516091","8516098","8516100","8516106","8516121","8516124"]
+
     '''创建的计划最终要删除，定义一个全局的变量'''
     global GL_DEL_CAMPAIGN_LIST
     GL_DEL_CAMPAIGN_LIST = []
@@ -74,7 +91,7 @@ def pre_cn():
     定义ad_cycle的Base URL
     """
     global GL_URL_AD_CYCLE
-    GL_URL_AD_CYCLE = 'http://ad-cycle-internal-preonline.fmtest.tech'
+    GL_URL_AD_CYCLE = 'http://ad-cycle.preonline.internal.fmtest.tech'
 
 def sandbox_cn():
     global GL_TOKEN
@@ -113,11 +130,11 @@ def sandbox_cn():
     """
     '''定义ad_group的Base URL'''
     global GL_URL_AD_GROUP
-    GL_URL_AD_GROUP = 'http://ad-group-internal.fmtest.tech'
+    GL_URL_AD_GROUP = 'http://ad-group.internal.fmtest.tech'
 
     '''定义ad_strategy的Base URL'''
     global GL_URL_AD_STRATEGY
-    GL_URL_AD_STRATEGY = 'http://ad-strategy-internal.fmtest.tech'
+    GL_URL_AD_STRATEGY = 'http://ad-strategy.internal.fmtest.tech'
 
     '''定义城市ID,测试使用中山市'''
     global GL_CITY_ID
@@ -153,11 +170,16 @@ def sandbox_cn():
 
     global GL_DSPID2
     GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
+
+    '''创建的计划最终要删除，定义一个全局的变量'''
+    global GL_DEL_CAMPAIGN_LIST
+    GL_DEL_CAMPAIGN_LIST = []
+
     """
     定义ad_cycle的Base URL
     """
     global GL_URL_AD_CYCLE
-    GL_URL_AD_CYCLE = 'http://ad-cycle-internal.fmtest.tech'
+    GL_URL_AD_CYCLE = 'http://ad-cycle.internal.fmtest.tech'
 
 def sandbox_sg():
     global GL_TOKEN
@@ -231,8 +253,9 @@ def get_initial_environment():
     '''获取当前及下个发布周期ID'''
     global GL_CUR_AD_CYCLE_ID
     global GL_NEXT_AD_CYCLE_ID
-    get_adCycleId = GL_URL_AD_CYCLE + '/v1/adCycle?limit=2'
+    get_adCycleId = GL_URL_AD_CYCLE + '/v1/adCycle?limit=2&productName=SMART_SCREEN'
     result = requests.get(get_adCycleId, headers=GL_HEADERS, verify=False)
+    print(result.json())
     GL_CUR_AD_CYCLE_ID = result.json()[1]["id"]
     GL_NEXT_AD_CYCLE_ID = result.json()[0]["id"]
 
@@ -290,4 +313,4 @@ def get_initial_environment():
 sandbox_cn()
 # pre_cn()
 
-get_initial_environment()
+# get_initial_environment()

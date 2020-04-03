@@ -3,6 +3,7 @@ import unittest
 import time
 import os
 import ad_campaign
+import pytest
 """
 修改计划
 同报备号下计划名称不允许重复
@@ -10,7 +11,7 @@ import ad_campaign
 """
 
 
-class EditCampaign(unittest.TestCase):
+class TestEditCampaign(unittest.TestCase):
     def setUp(self):
         pass
 
@@ -104,19 +105,6 @@ class EditCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    # 构造测试集
-    # discover = unittest.TestSuite()
-    # discover.addTest(createCampaign("test_createKaVacantCampaign_success"))
-    # print(discover)
-
-    # 按方法名构造用例集
-    # 定义测试用例集
-
-    test_dir = os.path.abspath('.')
-    discover = unittest.defaultTestLoader.discover(test_dir, pattern="test*.py")
-
-    # 执行测试
-    runner = unittest.TextTestRunner()
-    runner.run(discover)
+    pytest.main()
 
 
