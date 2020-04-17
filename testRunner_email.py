@@ -97,8 +97,13 @@ def suite():
 
 if __name__ == '__main__':
 
-    pytest.main()
+
+    # pytest.main() #运行同级目录及下面的全部用例
 # pytest.main(['testCase/campaign/test_campaign_list.py','--alluredir','testReport/reportallure/'])
  # 执行命令 allure generate ./temp -o ./report --clean ，生成测试报告
  #    os.system('allure generate testReport/reportallure -o ./report --clean')
- #    pytest
+    #指定运行某个目录下的某个用例
+    # pytest.main(["testCase/campaign/test_campaign_list.py"])
+    #指定运行某个目录下的全部用例
+    pytest.main(["testCase/campaign/"])
+    # pytest.main("-v -s test_campaign_list.py")

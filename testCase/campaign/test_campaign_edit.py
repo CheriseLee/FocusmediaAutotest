@@ -11,11 +11,11 @@ import pytest
 """
 
 
-class TestEditCampaign(unittest.TestCase):
-    def setUp(self):
+class TestEditCampaign():
+    def setup_method(self):
         pass
 
-    def tearDown(self):
+    def teardown_method(self):
         for ad_campaign_id in global_demo.GL_DEL_CAMPAIGN_LIST:
             ad_campaign.AdCampaign().del_campaign(ad_campaign_id)
 
@@ -33,7 +33,9 @@ class TestEditCampaign(unittest.TestCase):
 
         '''修改计划'''
         result = ad_campaign.AdCampaign.edit_campaign(ad_campaign_id, campaign_name, note='')
-        self.assertEqual(result.status_code, 200, msg='修改计划，状态码为200则用例通过')
+        # self.assertEqual(result.status_code, 200, msg='修改计划，状态码为200则用例通过')
+        assert result.status_code == 200
+
 
     def test_edit_campaign_success1(self):
         """修改计划的名称、备注和之前不同，允许修改"""
@@ -49,7 +51,7 @@ class TestEditCampaign(unittest.TestCase):
 
         '''修改计划'''
         result = ad_campaign.AdCampaign.edit_campaign(ad_campaign_id, campaign_name='change', note='change')
-        self.assertEqual(result.status_code, 200, msg='修改计划，状态码为200则用例通过')
+        assert result.status_code == 200
 
     def test_edit_campaign_fail(self):
         """修改计划的名称和报备号下其他计划重复，修改失败"""
@@ -72,18 +74,18 @@ class TestEditCampaign(unittest.TestCase):
 
         '''修改计划2的名称和计划1相同,修改失败'''
         result = ad_campaign.AdCampaign.edit_campaign(ad_campaign_id1, campaign_name, note='')
-        self.assertEqual(result.status_code, 400, msg='修改计划，状态码为400则用例通过')
+        assert result.status_code == 400
         text = result.json()
         response_code = text["code"]
-        self.assertEqual(response_code, "AdCampaignNameDuplicated", msg='计划名称重复，返回码为AdCampaignNameDuplicated则用例通过')
+        assert response_code == "AdCampaignNameDuplicated"
 
     def test_edit_unexist_campaign_fail(self):
         """修改的计划ID不存在，修改失败"""
         result = ad_campaign.AdCampaign.edit_campaign(ad_campaign_id='212', campaign_name='323', note='')
-        self.assertEqual(result.status_code, 400, msg='修改计划，状态码为400则用例通过')
+        assert result.status_code == 400
         text = result.json()
         response_code = text["code"]
-        self.assertEqual(response_code, "AdCampaignIsNull", msg='计划ID不存在，返回码为AdCampaignIsNull则用例通过')
+        assert response_code == "AdCampaignIsNull"
 
     def test_edit_campaign_name_null_fail(self):
         """修改计划的名称为空，修改失败"""
@@ -98,13 +100,14 @@ class TestEditCampaign(unittest.TestCase):
 
         '''修改计划的名称为空,修改失败'''
         result = ad_campaign.AdCampaign.edit_campaign(ad_campaign_id, campaign_name='', note='')
-        self.assertEqual(result.status_code, 400, msg='修改计划，状态码为400则用例通过')
         text = result.json()
         response_code = text["code"]
-        self.assertEqual(response_code, "BadRequest", msg='计划名称为空，返回码为BadRequest则用例通过')
+        assert result.status_code == 400
+        assert response_code == "BadRequest"
 
 
 if __name__ == '__main__':
-    pytest.main()
+    # pytest.main()
+    pytest.main("-v -s test_campaign_list.py")
 
 

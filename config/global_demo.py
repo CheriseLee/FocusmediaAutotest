@@ -93,6 +93,24 @@ def pre_cn():
     global GL_URL_AD_CYCLE
     GL_URL_AD_CYCLE = 'http://ad-cycle.preonline.internal.fmtest.tech'
 
+    """
+    定义ad_strategy的Base URL
+    """
+    global GL_URL_AD_STRATEGY
+    GL_URL_AD_STRATEGY = 'http://ad-strategy.preonline.internal.fmtest.tech'
+
+    """
+    定义creative的Base URL
+    """
+    global GL_URL_AD_CREATIVE
+    GL_URL_AD_CREATIVE = 'http://creative.preonline.internal.fmtest.tech'
+
+    """
+    定义resource的Base URL
+    """
+    global GL_URL_AD_RESOURCE
+    GL_URL_AD_RESOURCE = 'http://ad-resource.preonline.internal.fmtest.tech'
+
 def sandbox_cn():
     global GL_TOKEN
     GL_TOKEN = get_token.get_token()
@@ -105,7 +123,8 @@ def sandbox_cn():
         'Origin': 'https://ad-preonline.fmtest.tech',
         'Referer': 'https://ad-preonline.fmtest.tech/',
         'Sec-Fetch-Mode': 'cors',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36',
+        'ca-app-id':'12344'
     }
     global GL_HEADERS
     GL_HEADERS = headers
@@ -180,6 +199,21 @@ def sandbox_cn():
     """
     global GL_URL_AD_CYCLE
     GL_URL_AD_CYCLE = 'http://ad-cycle.internal.fmtest.tech'
+
+    """
+    定义resource的Base URL
+    """
+    global GL_URL_AD_RESOURCE
+    GL_URL_AD_RESOURCE = 'http://ad-resource.internal.fmtest.tech'
+
+
+
+    """
+    定义creative的Base URL
+    """
+    global GL_URL_AD_CREATIVE
+    GL_URL_AD_CREATIVE = 'http://creative.internal.fmtest.tech'
+
 
 def sandbox_sg():
     global GL_TOKEN
@@ -310,7 +344,94 @@ def get_initial_environment():
         terminate_unit = GL_URL_AD_GROUP + '/v1/ad/unit/terminate'
         requests.post(terminate_unit, json=payload, headers=GL_HEADERS, verify=False)
 
-sandbox_cn()
-# pre_cn()
+
+def online_cn():
+    global GL_TOKEN
+    GL_TOKEN = get_token.get_token()
+    """
+    定义头文件为全局变量
+    """
+    headers = {
+        'Authorization': GL_TOKEN,
+        'Content-Type': 'application/json',
+        'Origin': 'https://ad-preonline.fmtest.tech',
+        'Referer': 'https://ad-preonline.fmtest.tech/',
+        'Sec-Fetch-Mode': 'cors',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+    }
+    global GL_HEADERS
+    GL_HEADERS = headers
+
+    """
+    连接Pre数据库，定义数据库为全局变量
+    """
+    connection = pymysql.connect(
+        host='rm-uf636zdzhj6ka5q8f.mysql.rds.aliyuncs.com',
+        port=3306,
+        user='liuwei',
+        passwd='Mhxzkhl@123',
+        db='kuma_ad_group',
+        charset='utf8mb4',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    global GL_CONNECTION
+    GL_CONNECTION = connection
+
+    """
+    计划、单元相关变量定义
+    """
+    '''定义ad_group的Base URL'''
+    global GL_URL_AD_GROUP
+    GL_URL_AD_GROUP = 'http://ad-group.internal.focusmedia.tech'
+
+    '''定义城市ID,测试使用中山市'''
+    global GL_CITY_ID
+    GL_CITY_ID = '442000000000'
+
+    '''中山市A\B套套装编码'''
+    global GL_SUIT_CODES
+    GL_SUIT_CODES = ['EA300101', 'EA300148', 'EA300116', 'EA300163']
+
+    global GL_BUILDING_IDS
+    GL_BUILDING_IDS = ['5009136', '5009135', '5009134']
+
+    global GL_REFER_ID1
+    GL_REFER_ID1 = '186073'
+
+    global GL_REFER_ID2
+    GL_REFER_ID2 = '191738'
+
+    global GL_DSPID1
+    GL_DSPID1 = '29f2678825c447aebc2667e5aeed879d'
+
+    global GL_DSPID2
+    GL_DSPID2 = '86fb9ce3e28d4d599e68b3fab4b69be6'
+
+    global GL_NONPROFIT_ID
+    GL_NONPROFIT_ID= 'E-1800265'
+
+    global GL_PROPERTY_ADMINID
+    GL_PROPERTY_ADMINID = 'P3029339'
+
+    global GL_PROPERTY_LOCATION_IDS
+    GL_PROPERTY_LOCATION_IDS = ["8516112","8516113","8516114","8516115","8516116","8516118","8516130","8516090","8516126",
+                                "8516096","8516097","8516099","8516101","8516105","8516125","8516128","8516087","8516093",
+                                "8516092","8516107","8516108","8516109","8516120","8516086","8516088","8516102","8516123",
+                                "8516094","8516110","8516111","8516117","8516103","8516095","8516119","8516104","8516122",
+                                "8516129","8516089","8516091","8516098","8516100","8516106","8516121","8516124"]
+
+    '''创建的计划最终要删除，定义一个全局的变量'''
+    global GL_DEL_CAMPAIGN_LIST
+    GL_DEL_CAMPAIGN_LIST = []
+
+    """
+    定义ad_cycle的Base URL
+    """
+    global GL_URL_AD_CYCLE
+    GL_URL_AD_CYCLE = 'http://ad-cycle.preonline.internal.fmtest.tech'
+
+# sandbox_cn()
+pre_cn()
+# online_cn()
 
 # get_initial_environment()

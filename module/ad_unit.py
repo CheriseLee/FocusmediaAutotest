@@ -61,6 +61,84 @@ class AdUnit:
         return ad_unit_id
 
     @staticmethod
+    def batch_create_adunits(ad_campaign_id):
+        """批量创建单元，只能针对同一个计划创建"""
+        payload = {
+            "adCampaignId": ad_campaign_id,
+            "adUnitItemRequests": [
+                {
+                    "cityId": global_demo.GL_CITY_ID,
+                    "goalLocationNum": 1,
+                    "scopeEnum": "ALL",
+                    "targetIds": global_demo.GL_SUIT_CODES,
+                    "targetType": "SUIT"
+                },
+
+                {
+                    "cityId": global_demo.GL_CITY_ID,
+                    "goalLocationNum": 1,
+                    "scopeEnum": "ALL",
+                    "targetIds":global_demo.GL_BUILDING_IDS,
+                    "targetType": "BUILDING"
+                }
+            ],
+
+            "adUnitType": "GUARANTEED",
+            "durationInSecond": "15",
+            "frequency": "300",
+            "startDate": time_function.GetTime.get_next_monday(),
+            "endDate": time_function.GetTime.get_next_sunday(),
+            "hours": [],
+            "dsp": False
+        }
+        batchCreateAdUnits = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/batchCreateAdUnits'
+        result = requests.post(batchCreateAdUnits,json=payload, headers=global_demo.GL_HEADERS, verify=False)
+
+        return result.json()
+
+    @staticmethod
+    def batch_delete_adunits(ad_unit_ids):
+        """批量创建单元，只能针对同一个计划创建"""
+        payload = ad_unit_ids
+        batchdeleteAdUnits = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/batchDelete'
+        result = requests.post(batchdeleteAdUnits,json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        return result.json()
+
+    @staticmethod
+    def cancel_unit(ad_unit_id):
+        """取消单元"""
+        payload = {
+            "adUnitId": ad_unit_id
+        }
+        terminate_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/cancel/'+ad_unit_id
+        result = requests.post(terminate_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        return result
+
+    @staticmethod
+    def check_suit(start_date,city_id,suit_code):
+        """检查套装在哪些单元中使用"""
+        payload = {
+              "startDate": start_date,
+                   "suitInfo": {
+                   "cityId": city_id,
+                   "suitCode": suit_code[0]
+              }
+        }
+        check_suit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/checkSuit'
+        result = requests.post(check_suit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        return result
+
+    @staticmethod
+    def confirm_unit(ad_unit_id):
+        """单元确认"""
+        payload = {
+            "adUnitId": ad_unit_id
+        }
+        confirm_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/confirm/' + ad_unit_id
+        result = requests.post(confirm_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        return result
+
+    @staticmethod
     def create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, ad_unit_target_ids, ad_campaign_id, dsp_id, target_type, hours=[],fakeSuitInfo="",goal_location_num = 1):
 
         payload = {
@@ -593,6 +671,31 @@ class AdUnit:
         return result
 
     @staticmethod
+    def edit_unit(ad_unit_id, duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, ad_unit_target_ids, ad_campaign_id, dsp_id, target_type, hours=[],fakeSuitInfo="",goal_location_num = 1):
+        '''修改意向中单元'''
+        payload = {
+            "adUnitId": ad_unit_id,
+            "durationInSecond": duration_in_second,
+            "frequency": frequency,
+            "startDate": start_date,
+            "endDate": end_date,
+            "hours": hours,
+            "goalLocationNum": goal_location_num,
+            "adUnitType": ad_unit_type,
+            "dsp": dsp,
+            "adUnitTargetIds": ad_unit_target_ids,
+            "cityId": global_demo.GL_CITY_ID,
+            "dspId": dsp_id,
+            "targetType": target_type,
+            "fakeSuitInfo":fakeSuitInfo
+        }
+        edit_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/edit'
+        result = requests.post(edit_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        # response = result.json()
+        # ad_unit_id = response['adUnitId']
+        return result
+
+    @staticmethod
     def reserve_unit(ad_unit_id):
         """单元锁位"""
         payload = {
@@ -602,15 +705,7 @@ class AdUnit:
         result = requests.post(reserve_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
         return result
 
-    @staticmethod
-    def confirm_unit(ad_unit_id):
-        """单元确认"""
-        payload = {
-            "adUnitId": ad_unit_id
-        }
-        confirm_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/confirm/' + ad_unit_id
-        result = requests.post(confirm_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
+
 
     @staticmethod
     def revert_unit(ad_unit_id):
@@ -646,23 +741,13 @@ class AdUnit:
         result = requests.post(terminate_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
         return result
 
-    @staticmethod
-    def cancel_unit(ad_unit_id):
-        """取消单元"""
-        payload = {
-            "adUnitId": ad_unit_id
-        }
-        terminate_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/cancel/'+ad_unit_id
-        result = requests.post(terminate_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
+
 
     @staticmethod
     def get_unit_info(ad_unit_id):
+        """获取单元详情"""
         get_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/get/' + ad_unit_id
         result = requests.get(get_unit, headers=global_demo.GL_HEADERS, verify=False)
         return result.json()
 
 
-# AdUnit.create_unit(duration_in_second=30, frequency=100, start_date='2019-12-12', end_date='2019-12-12', ad_unit_type='CANDIDATE',
-#                                                   dsp=True, suit_codes=['EA300101'], ad_campaign_id='186073_123039', dsp_id=global_demo.GL_DSPID1, target_type='LOCATION')
-# AdUnit.create_ka_guaranteed_building_unit()
