@@ -34,14 +34,10 @@ class TestEditUnit(unittest.TestCase):
         '''创建单元'''
         start_date = time_function.GetTime.get_tomorrow()
         end_date = time_function.GetTime.get_next_next_sunday()
-        duration_in_second=15
-        frequency=300
         ad_unit_type='GUARANTEED'
-        dsp = False
         ad_unit_target_ids = global_demo.GL_SUIT_CODES
-        dsp_id=''
         target_type='SUIT'
-        create_info = ad_unit.AdUnit.create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, ad_unit_target_ids, ad_campaign_id, dsp_id, target_type, hours=[],fakeSuitInfo="",goal_location_num = 1)
+        create_info = ad_unit.AdUnit.create_pure_unit(ad_unit_type, ad_unit_target_ids, ad_campaign_id,  target_type, start_date,end_date)
 
         '''编辑单元'''
 

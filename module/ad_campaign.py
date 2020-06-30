@@ -20,7 +20,7 @@ class AdCampaign:
         return result
 
     @staticmethod
-    def create_campaign(refer_id, campaign_name, campaign_type, note):
+    def create_campaign(refer_id, campaign_type, campaign_name, note=''):
         """
         创建一个计划
         :param refer_id:
@@ -37,6 +37,7 @@ class AdCampaign:
             "source": "CONSOLE",
             "note": note
         }
+        # print(payload)
         create_campaign = global_demo.GL_URL_AD_GROUP + '/v1/ad/campaign/create'
         result = requests.post(create_campaign, json=payload, headers=global_demo.GL_HEADERS, verify=False)
         return result
@@ -105,6 +106,7 @@ class AdCampaign:
                 # "brand": '',
                 "pageNo": 1,
                 "pageSize": n,
+                "source": "CONSOLE"
                 # "orderByCreateTime": '',
                 # "orderByAdUnitCount": ''
         }

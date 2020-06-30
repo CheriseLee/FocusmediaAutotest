@@ -107,7 +107,18 @@ class TestEditCampaign():
 
 
 if __name__ == '__main__':
+    dir_path = os.path.abspath('.')
+    # 存放报告的文件夹
+    report_dir = dir_path + '\\testReport\\'
+    # 报告命名时间格式化
+    now = time.strftime("%Y-%m-%d %H_%M_%S")
+    # 报告文件完整路径
+    report_name = 'KUMA接口自动化测试报告' + now + '.html'
+
+    # 指定运行某个目录下的某个用例
+    pytest.main(["test_campaign_edit.py",
+                 "--html=testReport/%s" % (report_name)])
     # pytest.main()
-    pytest.main("-v -s test_campaign_list.py")
+    # pytest.main("-v -s test_campaign_list.py")
 
 

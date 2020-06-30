@@ -27,13 +27,37 @@ class AdStrategy:
         return creative_info_30
 
     @staticmethod
-    def get_creative_id(duration, report_id):
-        if duration == 15:
-            creative_id = AdStrategy.creative_Info_15()[report_id]
-            return creative_id
-        elif duration == 30:
-            creative_id = AdStrategy.creative_Info_30()[report_id]
-            return creative_id
+    def get_creative_id(duration, account_id, product_name):
+        '''根据账号和单元时长查询匹配到的已审核创意'''
+        payload = {
+            "accountIds": [account_id],
+            "groupDurations": [duration],
+            "groupFilters": [
+                {
+                    "keyword": "STATUS",
+                    "values": [
+                        "AUDIT_PASS"
+                    ]
+                },
+                {
+                    "keyword": "SOURCE",
+                    "values": [
+                        "MANAGEMENT"
+                    ]
+                }
+            ],
+            "productName": product_name
+        }
+        get_creative_url = global_demo.GL_URL_AD_CREATIVE + '/v1/creative-group/list'
+        result = requests.post(get_creative_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        response = result.json().get('data')  # 获取创意列表
+
+        # print(type(response))
+        creative_id_list = []
+        for key, value in enumerate(response):
+            creative_id_list.append(value.get('creativeGroupId'))
+
+        return creative_id_list
 
     @staticmethod
     def create_AdUnitStrategy(ad_unit_id):

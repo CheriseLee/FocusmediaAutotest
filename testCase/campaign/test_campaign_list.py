@@ -4,13 +4,14 @@ import os
 import ad_campaign
 import operator
 import pytest
+import time
 """
 按照创建时间，查询最近的10个计划（工作台左侧）
 @lihuanhuan@focusmedia.cn
 """
 
 
-class TestListCampaign(unittest.TestCase):
+class TestListCampaign():
     def setUp(self):
         pass
 
@@ -44,6 +45,17 @@ class TestListCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    pytest.main()
+    dir_path = os.path.abspath('.')
+    # 存放报告的文件夹
+    report_dir = dir_path + '\\testReport\\'
+    # 报告命名时间格式化
+    now = time.strftime("%Y-%m-%d %H_%M_%S")
+    # 报告文件完整路径
+    report_name = 'KUMA接口自动化测试报告' + now + '.html'
+    print(report_name)
+
+    # 指定运行某个目录下的某个用例
+    pytest.main(["testCase/campaign/test_campaign_list.py",
+                 "--html=testReport/%s" % (report_name)])
 
 

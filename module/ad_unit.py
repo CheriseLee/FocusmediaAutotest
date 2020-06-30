@@ -3,6 +3,8 @@ import global_demo
 import time
 import ad_campaign
 import time_function
+import ad_resource
+import json
 """
 单元模块的接口
 @lihuanhuan@focusmedia.cn
@@ -40,7 +42,6 @@ class AdUnit:
         try:
             cursor.execute(sql, value)
             global_demo.GL_CONNECTION.commit()
-            global_demo
         except Exception as e:
             global_demo.GL_CONNECTION.rollback()
         return ad_unit_id
@@ -61,28 +62,24 @@ class AdUnit:
         return ad_unit_id
 
     @staticmethod
-    def batch_create_adunits(ad_campaign_id):
+    def batch_create_adunits(ad_campaign_id, unit_no, goal_location_num):
         """批量创建单元，只能针对同一个计划创建"""
+        #获取全部城市ID
+        city_id_list = ad_resource.AdResource.get_all_city_id()
+
+        ad_unit_items = []
+        for i in range(unit_no):
+            item ={}
+            item['cityId'] = city_id_list[i]
+            item['goalLocationNum'] = goal_location_num
+            item['scopeEnum'] = "ALL"
+            item['targetIds'] = city_id_list[i]
+            item['targetType'] = "CITY"
+            ad_unit_items.append(item)
+
         payload = {
             "adCampaignId": ad_campaign_id,
-            "adUnitItemRequests": [
-                {
-                    "cityId": global_demo.GL_CITY_ID,
-                    "goalLocationNum": 1,
-                    "scopeEnum": "ALL",
-                    "targetIds": global_demo.GL_SUIT_CODES,
-                    "targetType": "SUIT"
-                },
-
-                {
-                    "cityId": global_demo.GL_CITY_ID,
-                    "goalLocationNum": 1,
-                    "scopeEnum": "ALL",
-                    "targetIds":global_demo.GL_BUILDING_IDS,
-                    "targetType": "BUILDING"
-                }
-            ],
-
+            "adUnitItemRequests": ad_unit_items,
             "adUnitType": "GUARANTEED",
             "durationInSecond": "15",
             "frequency": "300",
@@ -94,14 +91,16 @@ class AdUnit:
         batchCreateAdUnits = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/batchCreateAdUnits'
         result = requests.post(batchCreateAdUnits,json=payload, headers=global_demo.GL_HEADERS, verify=False)
 
-        return result.json()
+        return result
 
     @staticmethod
     def batch_delete_adunits(ad_unit_ids):
-        """批量创建单元，只能针对同一个计划创建"""
-        payload = ad_unit_ids
+        """批量删除单元"""
+        payload=[str(ad_unit_ids)]
+        # payload =json.dumps(ad_unit_ids)
+
         batchdeleteAdUnits = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/batchDelete'
-        result = requests.post(batchdeleteAdUnits,json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        result = requests.post(batchdeleteAdUnits,data=payload, headers=global_demo.GL_HEADERS, verify=False)
         return result.json()
 
     @staticmethod
@@ -139,7 +138,9 @@ class AdUnit:
         return result
 
     @staticmethod
-    def create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, ad_unit_target_ids, ad_campaign_id, dsp_id, target_type, hours=[],fakeSuitInfo="",goal_location_num = 1):
+    def create_pure_unit(ad_campaign_id,ad_unit_type, ad_unit_target_ids, target_type, start_date=time_function.GetTime.get_tomorrow(),
+                         end_date=time_function.GetTime.get_next_next_sunday(), duration_in_second=15, frequency=300,
+                         dsp=False,  dsp_id='', hours=[], fake_suit_info="", goal_location_num=1):
 
         payload = {
             "durationInSecond": duration_in_second,
@@ -156,7 +157,7 @@ class AdUnit:
             "cityId": global_demo.GL_CITY_ID,
             "dspId": dsp_id,
             "targetType": target_type,
-            "fakeSuitInfo":fakeSuitInfo
+            "fakeSuitInfo":fake_suit_info
         }
         create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
         result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
@@ -164,510 +165,42 @@ class AdUnit:
         # ad_unit_id = response['adUnitId']
         return result
 
-
     @staticmethod
-    def create_ka_guaranteed_suit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
+    def create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids, target_type, start_date=time_function.GetTime.get_tomorrow(),
+                         end_date=time_function.GetTime.get_next_next_sunday(), duration_in_second=15, frequency=300,
+                         dsp=False,  dsp_id='', hours=[], fake_suit_info="", goal_location_num=1):
 
-        ''' 创建一个计划，创建KA必播套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
+        if ad_campaign_type == 'KA' or ad_campaign_type == 'VACANT':
+            refer_id = global_demo.GL_REFER_ID1
+        elif ad_campaign_type == 'NONPROFIT':
+            refer_id = global_demo.GL_NONPROFIT_ID
+        elif ad_campaign_type == 'PROPERTY':
+            refer_id = global_demo.GL_PROPERTY_ADMINID
+
+        result = ad_campaign.AdCampaign.create_campaign(refer_id, ad_campaign_type, campaign_name=int(round(time.time() * 1000000)), note='')
         ad_campaign_id = result.text
-        '''创建单元的请求参数'''
+
         payload = {
             "durationInSecond": duration_in_second,
             "frequency": frequency,
             "startDate": start_date,
             "endDate": end_date,
             "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "targetType": "SUIT",
-            "adUnitTargetIds": global_demo.GL_SUIT_CODES,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-
-    @staticmethod
-    def create_ka_guaranteed_building_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA必播按项目下单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-
-    @staticmethod
-    def create_ka_guaranteed_city_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA必播全城单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_ka_guaranteed_city_fakesuit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA必播全城模拟套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
             "goalLocationNum": goal_location_num,
-            "fakeSuitInfo": "A"
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_ka_guaranteed_building_fakesuit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA必播按项目下模拟套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
+            # "productName": "SMART_SCREEN",
+            "adUnitType": ad_unit_type,
+            "dsp": dsp,
+            "adUnitTargetIds": ad_unit_target_ids,
             "adCampaignId": ad_campaign_id,
             "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num,
-            "fakeSuitInfo": "A"
+            "dspId": dsp_id,
+            "targetType": target_type,
+            "fakeSuitInfo":fake_suit_info
         }
         create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
         result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_ka_candidate_suit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[], goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA候补套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE",
-            "targetType": "SUIT",
-            "adUnitTargetIds": global_demo.GL_SUIT_CODES,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_ka_non_candidate_building_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                           end_date=time_function.GetTime.get_next_next_sunday(),
-                                           duration_in_second=15,
-                                           frequency=300,
-                                           hours=[], goal_location_num=-1):
-
-        ''' 创建一个计划，创建KA候补非抢占按项目下单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='KA', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE_NON_PREEMPTIVE",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-
-    '''创建候补单'''
-    @staticmethod
-    def create_vacant_non_candidate_city_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建空位候补非抢占全城单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID2,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='VACANT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE_NON_PREEMPTIVE",
-            "targetType": "CITY",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_vacant_non_candidate_suit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建空位候补非抢占套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID2,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='VACANT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE_NON_PREEMPTIVE",
-            "targetType": "SUIT",
-            "adUnitTargetIds": global_demo.GL_SUIT_CODES,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_vacant_non_candidate_building_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建空位候补非抢占挑点单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID2,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='VACANT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE_NON_PREEMPTIVE",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-    @staticmethod
-    def create_vacant_candidate_building_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                           end_date=time_function.GetTime.get_next_next_sunday(),
-                                           duration_in_second=15,
-                                           frequency=300,
-                                           hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建空位候补可抢占按项目下单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='VACANT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-
-    @staticmethod
-    def create_vacant_candidate_building_fakesuit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                                    end_date=time_function.GetTime.get_next_next_sunday(),
-                                                    duration_in_second=15,
-                                                    frequency=300,
-                                                    hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建空位候补按项目下模拟套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='VACANT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE",
-            "targetType": "BUILDING",
-            "adUnitTargetIds": global_demo.GL_BUILDING_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num,
-            "fakeSuitInfo": "A"
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_nonprofit_non_candidate_city_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                       end_date=time_function.GetTime.get_next_next_sunday(),
-                                       duration_in_second=15,
-                                       frequency=300,
-                                       hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建公益候补非抢占全城单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_REFER_ID1,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='NONPROFIT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE_NON_PREEMPTIVE",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_nonprofit_candidate_city_fakesuit_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                                end_date=time_function.GetTime.get_next_next_sunday(),
-                                                duration_in_second=15,
-                                                frequency=300,
-                                                hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建公益候补全城模拟套装单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_NONPROFIT_ID,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='NONPROFIT', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num,
-            "fakeSuitInfo": "A"
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_property_location_guaranteed_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                                      end_date=time_function.GetTime.get_next_next_sunday(),
-                                                      duration_in_second=15,
-                                                      frequency=300,
-                                                      hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建物业必播挑点单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_PROPERTY_ADMINID,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='PROPERTY', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "targetType": "LOCATION",
-            "adUnitTargetIds": global_demo.GL_PROPERTY_LOCATION_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num,
-            "fakeSuitInfo": "A"
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-
-    @staticmethod
-    def create_property_total_guaranteed_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                                      end_date=time_function.GetTime.get_next_next_sunday(),
-                                                      duration_in_second=15,
-                                                      frequency=300,
-                                                      hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建物业必播全物管单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_PROPERTY_ADMINID,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='PROPERTY', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "GUARANTEED",
-            "targetType": "PROPERTY_ADMIN",
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        return result
-
-    @staticmethod
-    def create_property_candidate_unit(start_date=time_function.GetTime.get_tomorrow(),
-                                                      end_date=time_function.GetTime.get_next_next_sunday(),
-                                                      duration_in_second=15,
-                                                      frequency=300,
-                                                      hours=[],goal_location_num=-1):
-
-        ''' 创建一个计划，创建物业候补挑点单 '''
-        result = ad_campaign.AdCampaign.create_campaign(refer_id=global_demo.GL_PROPERTY_ADMINID,
-                                                        campaign_name=int(round(time.time() * 1000000)),
-                                                        campaign_type='PROPERTY', note='')
-        ad_campaign_id = result.text
-        '''创建单元的请求参数'''
-        payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": hours,
-            "adUnitType": "CANDIDATE",
-            "targetType": "LOCATION",
-            "adUnitTargetIds": global_demo.GL_PROPERTY_LOCATION_IDS,
-            "adCampaignId": ad_campaign_id,
-            "cityId": global_demo.GL_CITY_ID,
-            "goalLocationNum": goal_location_num
-        }
-        create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-        result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        # response = result.json()
+        # ad_unit_id = response['adUnitId']
         return result
 
     @staticmethod
@@ -750,4 +283,21 @@ class AdUnit:
         result = requests.get(get_unit, headers=global_demo.GL_HEADERS, verify=False)
         return result.json()
 
+    @staticmethod
+    def get_unit_list(page_no, page_size, ad_campaign_id_list, ad_unit_status_list=None,city_id_list=None,
+                      start_date=None, end_date=None, product_name='SMART_SCREEN'):
+        """获取投放单元列表"""
+        payload = {
+            "adCampaignIdList": ad_campaign_id_list,
+            "adUnitStatusList": ad_unit_status_list,
+            "cityIdList": city_id_list,
+            "startDate": start_date,
+            "endDate": end_date,
+            "pageNo": page_no,
+            "pageSize": page_size,
+            "productName": product_name
+        }
+        get_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/list'
+        result = requests.post(get_unit,json=payload, headers=global_demo.GL_HEADERS, verify=False)
+        return result.json()
 

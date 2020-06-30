@@ -14,58 +14,31 @@ import json
 @lihuanhuan@focusmedia.cn
 """
 
-'''创建单元'''
-def create_unit(duration_in_second, frequency, start_date, end_date, ad_unit_type, dsp, target_type,ad_unit_target_ids, ad_campaign_id,
-                dsp_id):
-    payload = {
-            "durationInSecond": duration_in_second,
-            "frequency": frequency,
-            "startDate": start_date,
-            "endDate": end_date,
-            "hours": [
-            ],
-            "goalLocationNum": 2,
-            # "productName": "SMART_SCREEN",
-            "adUnitType": ad_unit_type,
-            "dsp": dsp,
-            "adUnitTargetIds": ad_unit_target_ids,
-            "adCampaignId": ad_campaign_id,
-            # "cityId": global_demo.GL_CITY_ID,
-            "cityId": "330100000000",
-            "dspId": dsp_id,
-            "targetType": target_type
-        }
-    create_unit = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/create'
-    result = requests.post(create_unit, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-
-    response = result.json()
-    # print(response)
-    ad_unit_id = response['adUnitId']
-    return ad_unit_id
 
 '''构建锁位未审核计划'''
 def create_many_campaign():
-    for i in range(560):
+    for i in range(10000):
 
         '''创建一个计划'''
-        refer_id = '100006'
+        refer_id = '136730'
         campaign_type = 'KA'
         campaign_name = 'lihhtest'+time.strftime("%Y-%m-%d %H_%M_%S")
-        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_name, campaign_type, note='')
+        result = ad_campaign.AdCampaign.create_campaign(refer_id, campaign_type,campaign_name,  note='')
         ad_campaign_id = result.text
         time.sleep(1)
+        for i in range(10):
 
-        '''创建一个候补单元'''
-        tomorrow = time_function.GetTime.get_tomorrow()
-        ad_unit_id = create_unit(duration_in_second=30, frequency=432, start_date=tomorrow,
-                                                       end_date=tomorrow, ad_unit_type='CANDIDATE',
-                                                       dsp=False, suit_codes=['EA127036'], ad_campaign_id=ad_campaign_id,
-                                                       dsp_id=global_demo.GL_DSPID1, target_type='SUIT')
+            '''创建一个候补单元'''
+            ad_unit_type ='CANDIDATE'
+            ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+            target_type = 'BUILDING'
+            response = ad_unit.AdUnit().create_pure_unit(ad_campaign_id,ad_unit_type, ad_unit_target_ids, target_type)
+            ad_unit_id = response.json().get('adUnitId')
 
-        payload = {}
-        '''确认'''
-        confirm_unit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/confirm/' + ad_unit_id
-        requests.post(confirm_unit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+            payload = {}
+            '''确认'''
+            confirm_unit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/confirm/' + ad_unit_id
+            requests.post(confirm_unit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
 
 '''按单元ID查询创意，5000条单元，分别多个创意，测试效率'''
 def getCreativeGroupIdsByAdUnitIds():
@@ -147,7 +120,7 @@ def create_strategy_targetset_data():
 
 '''批量创建计划，每个计划审核为不同的品牌'''
 def create_campaign():
-    for i in range(1):
+    for i in range(2):
         '''创建一个计划'''
         refer_id = '136730'
         campaign_type = 'KA'
@@ -199,7 +172,7 @@ if __name__ == '__main__':
     # getCreativeGroupIdsByAdUnitIds()
     # GUARANTEED()
     # create_strategy_targetset_data()
-    create_candidate_units()
+    create_many_campaign()
     endtime = time.strftime("%Y-%m-%d %H_%M_%S")
     print(endtime)
 

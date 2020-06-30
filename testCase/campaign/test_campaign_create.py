@@ -225,6 +225,6 @@ class TestCreateCampaign(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    pytest.main()
-
+    # pytest.main()
+    TestCreateCampaign().test_create_nonprofit_campaign_success()
 

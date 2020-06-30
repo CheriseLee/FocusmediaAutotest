@@ -23,10 +23,14 @@ class TestCreateUnit(unittest.TestCase):
         '''创建必播/项目/待发布/tomorrow~nextnextsunday/15*300单元'''
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建单元'''
+        ad_campaign_type = 'KA'
+        ad_unit_type = 'GUARANTEED'
         start_date = time_function.GetTime.get_tomorrow()
         end_date = time_function.GetTime.get_next_next_sunday()
+        ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+        target_type = 'BUILDING'
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_building_unit(start_date=start_date,end_date=end_date, goal_location_num=goal_location_num)
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids, target_type,start_date,end_date,goal_location_num=goal_location_num)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -59,8 +63,13 @@ class TestCreateUnit(unittest.TestCase):
         end_date = time_function.GetTime.get_tomorrow()
         frequency = 900
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_city_fakesuit_unit(start_date=start_date, end_date=end_date,
-                                                                    frequency=frequency, goal_location_num=goal_location_num)
+        ad_campaign_type = 'KA'
+        ad_unit_type = 'GUARANTEED'
+        ad_unit_target_ids = global_demo.GL_CITY_ID
+        target_type = 'CITY'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              goal_location_num=goal_location_num,frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -94,8 +103,13 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 30
         frequency = 600
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_building_unit(start_date=start_date,end_date=end_date,duration_in_second=duration_in_second,
-                                                                        frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'KA'
+        ad_unit_type = 'GUARANTEED'
+        ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+        target_type = 'BUILDING'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,duration_in_second=duration_in_second,
+                                                              goal_location_num=goal_location_num, frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -126,7 +140,12 @@ class TestCreateUnit(unittest.TestCase):
             '''创建单元'''
             start_date = time_function.GetTime.get_today()
             end_date = time_function.GetTime.get_tomorrow()
-            create_info = ad_unit.AdUnit.create_ka_guaranteed_suit_unit(start_date=start_date,end_date=end_date)
+            ad_campaign_type = 'KA'
+            ad_unit_type = 'GUARANTEED'
+            ad_unit_target_ids = global_demo.GL_SUIT_CODES
+            target_type = 'SUIT'
+            create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                                  target_type, start_date, end_date)
             response = create_info.json()
             ad_unit_id = response["adUnitId"]
             ad_campaign_id = response["adCampaignId"]
@@ -158,8 +177,14 @@ class TestCreateUnit(unittest.TestCase):
             end_date = time_function.GetTime.get_max_day()
             duration_in_second = 5
             frequency = 50
-            create_info = ad_unit.AdUnit.create_ka_guaranteed_suit_unit(start_date=start_date,end_date=end_date,duration_in_second=duration_in_second,
-                                                                        frequency=frequency)
+            ad_campaign_type = 'KA'
+            ad_unit_type = 'GUARANTEED'
+            ad_unit_target_ids = global_demo.GL_SUIT_CODES
+            target_type = 'SUIT'
+            create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                                  target_type, start_date, end_date,
+                                                                  duration_in_second=duration_in_second,
+                                                                  frequency=frequency)
             response = create_info.json()
             ad_unit_id = response["adUnitId"]
             ad_campaign_id = response["adCampaignId"]
@@ -193,8 +218,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 7.5
         frequency = 100
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_city_fakesuit_unit(start_date=start_date, end_date=end_date,
-                                                                    frequency=frequency,duration_in_second=duration_in_second,hours=[9.11], goal_location_num=goal_location_num)
+        ad_campaign_type = 'KA'
+        ad_unit_type = 'GUARANTEED'
+        ad_unit_target_ids = global_demo.GL_CITY_ID
+        target_type = 'CITY'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              goal_location_num=goal_location_num, frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -220,7 +251,7 @@ class TestCreateUnit(unittest.TestCase):
         ad_unit.AdUnit().delete_CANDIDATE_unit_fromDB(ad_unit_id)
 
     '''候补非抢占'''
-    def test_create_candidate_suit_unit7(self):
+    def test_create_vacant_candidate_suit_unit7(self):
         '''创建空位候补非抢占/套装/发布中/today~maxday/5*50单元'''
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建单元'''
@@ -228,9 +259,14 @@ class TestCreateUnit(unittest.TestCase):
         end_date = time_function.GetTime.get_max_day()
         duration_in_second = 5
         frequency = 50
-        create_info = ad_unit.AdUnit.create_vacant_non_candidate_suit_unit(start_date=start_date, end_date=end_date,
-                                                                        duration_in_second=duration_in_second,
-                                                                        frequency=frequency)
+        ad_campaign_type = 'VACANT'
+        ad_unit_type = 'CANDIDATE_NON_PREEMPTIVE'
+        ad_unit_target_ids = global_demo.GL_SUIT_CODES
+        target_type = 'SUIT'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -261,9 +297,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 30
         frequency = 600
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_vacant_non_candidate_building_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'VACANT'
+        ad_unit_type = 'CANDIDATE_NON_PREEMPTIVE'
+        ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+        target_type = 'BUILDING'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency,goal_location_num=goal_location_num)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -294,9 +335,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 15
         frequency = 300
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_vacant_non_candidate_city_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'VACANT'
+        ad_unit_type = 'CANDIDATE_NON_PREEMPTIVE'
+        ad_unit_target_ids = global_demo.GL_CITY_ID
+        target_type = 'CITY'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency, goal_location_num=goal_location_num)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -329,9 +375,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 5
         frequency = 50
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_nonprofit_candidate_city_fakesuit_unit(start_date=start_date, end_date=end_date,
-                                                                        duration_in_second=duration_in_second,
-                                                                        frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'NONPROFIT'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_CITY_ID
+        target_type = 'CITY'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency, goal_location_num=goal_location_num,fake_suit_info="A")
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -362,9 +413,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 30
         frequency = 600
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_vacant_candidate_building_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'VACANT'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+        target_type = 'BUILDING'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency, goal_location_num=goal_location_num)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -395,9 +451,14 @@ class TestCreateUnit(unittest.TestCase):
         duration_in_second = 15
         frequency = 300
         goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_vacant_candidate_building_fakesuit_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'VACANT'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_BUILDING_IDS
+        target_type = 'BUILDING'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency, goal_location_num=goal_location_num,fake_suit_info="A")
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -428,9 +489,14 @@ class TestCreateUnit(unittest.TestCase):
         end_date = time_function.GetTime.get_max_day()
         duration_in_second = 15
         frequency = 300
-        create_info = ad_unit.AdUnit.create_property_total_guaranteed_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'GUARANTEED'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'PROPERTY_ADMIN'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -462,10 +528,14 @@ class TestCreateUnit(unittest.TestCase):
         end_date = time_function.GetTime.get_max_day()
         duration_in_second = 15
         frequency = 300
-        goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_property_location_guaranteed_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'GUARANTEED'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -497,10 +567,14 @@ class TestCreateUnit(unittest.TestCase):
         end_date = time_function.GetTime.get_max_day()
         duration_in_second = 15
         frequency = 300
-        goal_location_num = 10
-        create_info = ad_unit.AdUnit.create_property_candidate_unit(start_date=start_date, end_date=end_date,
-                                                                           duration_in_second=duration_in_second,
-                                                                           frequency=frequency,goal_location_num=goal_location_num)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,
+                                                              duration_in_second=duration_in_second,
+                                                              frequency=frequency)
         response = create_info.json()
         ad_unit_id = response["adUnitId"]
         ad_campaign_id = response["adCampaignId"]
@@ -530,7 +604,12 @@ class TestCreateUnit(unittest.TestCase):
         '''创建单元'''
         start_date = time_function.GetTime.get_yesterday()
         end_date = time_function.GetTime.get_today()
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_suit_unit(start_date=start_date, end_date=end_date)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date)
         response = create_info.json()
         '''检查创建的单元信息和预期相同'''
         self.assertEqual(create_info.status_code, 400, msg='对比相等，则用例通过')
@@ -542,7 +621,12 @@ class TestCreateUnit(unittest.TestCase):
         '''创建单元'''
         start_date = time_function.GetTime.get_max_day()
         end_date = time_function.GetTime.get_bigger_than_max_day()
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_suit_unit(start_date=start_date, end_date=end_date)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date)
         response = create_info.json()
         '''检查创建的单元信息和预期相同'''
         self.assertEqual(create_info.status_code, 400, msg='对比相等，则用例通过')
@@ -555,7 +639,12 @@ class TestCreateUnit(unittest.TestCase):
         '''创建单元'''
         start_date = time_function.GetTime.get_max_day()
         end_date = time_function.GetTime.get_bigger_than_max_day()
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_suit_unit(start_date=start_date, end_date=end_date)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date)
         response = create_info.json()
         '''检查创建的单元信息和预期相同'''
         self.assertEqual(create_info.status_code, 400, msg='对比相等，则用例通过')
@@ -565,8 +654,15 @@ class TestCreateUnit(unittest.TestCase):
         '''创建所需点位数大于点位范围数的单元，创建失败'''
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''创建单元'''
+        start_date = time_function.GetTime.get_next_monday()
+        end_date = time_function.GetTime.get_next_monday()
         goal_location_num = 50000
-        create_info = ad_unit.AdUnit.create_ka_guaranteed_building_unit(goal_location_num=goal_location_num)
+        ad_campaign_type = 'PROPERTY'
+        ad_unit_type = 'CANDIDATE'
+        ad_unit_target_ids = global_demo.GL_PROPERTY_LOCATION_IDS
+        target_type = 'LOCATION'
+        create_info = ad_unit.AdUnit.create_campaign_and_unit(ad_campaign_type, ad_unit_type, ad_unit_target_ids,
+                                                              target_type, start_date, end_date,goal_location_num=goal_location_num)
         response = create_info.json()
         '''检查创建的单元信息和预期相同'''
         self.assertEqual(create_info.status_code, 400, msg='对比相等，则用例通过')

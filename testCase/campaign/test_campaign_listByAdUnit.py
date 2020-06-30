@@ -39,7 +39,7 @@ class TestListUnlockCampaign(unittest.TestCase):
         '''删除单元'''
         ad_unit.AdUnit().delete_unit(ad_unit_id)
 
-    def test_list__urgent_campaign_success(self):
+    def test_list_urgent_campaign_success(self):
         """查看急播过期计划，查询结果非空，查询成功"""
         global_demo.GL_DEL_CAMPAIGN_LIST = []
         '''计划下创建一个必播单元'''

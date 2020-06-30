@@ -344,7 +344,7 @@ class TestAuditCampaign(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    pytest.main()
+    pytest.main(["test_campaign_audit.py::TestAuditCampaign::test_audit_pending_campaign_fail"])
 
 
 

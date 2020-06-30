@@ -159,6 +159,10 @@ class CreateStrategy:
 
         return creative_id_list
 
+    @staticmethod
+    def get_refer_id(city_id, start_date, end_date,product_name):
+        '''获取某个城市某个发布期内涉及的全部referId'''
+
 
 
 
@@ -168,14 +172,14 @@ if __name__ == '__main__':
     product_name= 'SMART_SCREEN'
     '''定义排播的日期'''
     #获取当前发布期排播的起止日期
-    # start_date = time_function.GetTime.get_today()
-    # end_date = time_function.GetTime.get_this_sunday()
+    start_date = time_function.GetTime.get_today()
+    end_date = time_function.GetTime.get_this_sunday()
 
     #获取下一个发布期排播的起止日期
-    start_date = time_function.GetTime.get_next_monday()
-    end_date = time_function.GetTime.get_next_sunday()
+    # start_date = time_function.GetTime.get_next_monday()
+    # end_date = time_function.GetTime.get_next_sunday()
 
-    '''获取需要排播的单元信息'''
+    '''获取需要排播的单元信息: 对发布期内全部的单元进行排播'''
     # unit_info = CreateStrategy.get_units_info(city_id, start_date, end_date,product_name)
     #
     # for index,value in enumerate(unit_info):
@@ -206,46 +210,47 @@ if __name__ == '__main__':
     print('没有排播的单元数：'+str(len(no_strategy_list)))
 
 
+    '''对发布期内未排播的单元进行排播'''
+    # for key in no_strategy_list:
+    #     '''获取单元详情'''
+    #     get_unit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/get/'+ str(key)
+    #     result = requests.get(get_unit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+    #     unit = result.json()
+    #     ad_unit_id = unit['adUnitId']
+    #     duration = unit['durationInSecond']
+    #     account_id = unit['accountId']
+    #     refer_id = unit['referId']
+    #     creative_group_id_list = CreateStrategy.get_creative_id(duration, account_id,refer_id,product_name)
+    #     '''检查时间呀'''
+    #     start_date = time_function.GetTime.get_next_monday()
+    #     end_date = time_function.GetTime.get_next_sunday()
+    #     while start_date <= end_date:
+    #         for i in range(24):
+    #             creative_group_id = random.choice(creative_group_id_list)
+    #             if i <10 :
+    #                 start_time = '0'+str(i)+':00:00'
+    #                 end_time = '0'+str(i)+':59:59'
+    #             else:
+    #                 start_time = str(i)+':00:00'
+    #                 end_time = str(i)+':59:59'
+    #             payload = {
+    #                 "adUnitId": str(ad_unit_id),
+    #                 "creativeGroupIds": creative_group_id,
+    #                 "startDate": start_date,
+    #                 "startTime": start_time,
+    #                 "endDate": start_date,
+    #                 "endTime": end_time
+    #             }
+    #
+    #             url = global_demo.GL_URL_AD_STRATEGY+'/v1/createAdUnitStrategy'
+    #             requests.post(url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
+    #             time.sleep(1)
+    #
+    #         #生成下一天的日期
+    #         date_list = time.strptime(start_date, "%Y-%m-%d")
+    #         y, m, d = date_list[:3]
+    #         delta = timedelta(1)
+    #         date_result = datetime(y, m, d) + delta
+    #         start_date = date_result.strftime("%Y-%m-%d")
 
-    for key in no_strategy_list:
-        '''获取单元详情'''
-        get_unit_url = global_demo.GL_URL_AD_GROUP + '/v1/ad/unit/get/'+ str(key)
-        result = requests.get(get_unit_url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-        unit = result.json()
-        ad_unit_id = unit['adUnitId']
-        duration = unit['durationInSecond']
-        account_id = unit['accountId']
-        refer_id = unit['referId']
-        creative_group_id_list = CreateStrategy.get_creative_id(duration, account_id,refer_id,product_name)
-        '''检查时间呀'''
-        start_date = time_function.GetTime.get_next_monday()
-        end_date = time_function.GetTime.get_next_sunday()
-        while start_date <= end_date:
-            for i in range(24):
-                creative_group_id = random.choice(creative_group_id_list)
-                if i <10 :
-                    start_time = '0'+str(i)+':00:00'
-                    end_time = '0'+str(i)+':59:59'
-                else:
-                    start_time = str(i)+':00:00'
-                    end_time = str(i)+':59:59'
-                payload = {
-                    "adUnitId": str(ad_unit_id),
-                    "creativeGroupIds": creative_group_id,
-                    "startDate": start_date,
-                    "startTime": start_time,
-                    "endDate": start_date,
-                    "endTime": end_time
-                }
-
-                url = global_demo.GL_URL_AD_STRATEGY+'/v1/createAdUnitStrategy'
-                requests.post(url, json=payload, headers=global_demo.GL_HEADERS, verify=False)
-                time.sleep(1)
-
-            #生成下一天的日期
-            date_list = time.strptime(start_date, "%Y-%m-%d")
-            y, m, d = date_list[:3]
-            delta = timedelta(1)
-            date_result = datetime(y, m, d) + delta
-            start_date = date_result.strftime("%Y-%m-%d")
-
+    '''调用批量排播接口，对相同报备号，相同时长的单元进行批量排播'''

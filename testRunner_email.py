@@ -9,6 +9,9 @@ import os
 from BSTestRunner import *
 import unittest
 import pytest
+import django
+from apscheduler.schedulers.blocking import BlockingScheduler
+import datetime
 
 
 def send_mail(latest_report):
@@ -91,19 +94,46 @@ def suite():
         runner.run(discover)
     f.close()
 
+    # latestReport = latest_report(report_dir)
+    # send_mail(latestReport)
+
+def run_test():
+    # 获取当前路径
+    dir_path = os.path.abspath('.')
+    # # 存放报告的文件夹
+    report_dir = dir_path + '\\testReport\\'
+    # # 报告命名时间格式化
+    now = time.strftime("%Y-%m-%d %H_%M_%S")
+    # # 报告文件完整路径
+    report_name = 'KUMA接口自动化测试报告' + now + '.html'
+    # print(report_name)
+
+    # 指定运行某个目录下的某个用例
+    pytest.main(["testCase/product/",
+                 "--html=testReport/%s" % (report_name)])
+    # pytest.main(["testCase/campaign/test_campaign_list.py",
+    #              "--alluredir=testReport/test/"])
+    # 指定运行某个目录下的全部用例
+    # pytest.main(["testCase/campaign/"])
+    # pytest.main("-v -s test_campaign_list.py")
+
     latestReport = latest_report(report_dir)
     send_mail(latestReport)
 
 
+
+
+
 if __name__ == '__main__':
+    while True:
+        timing = time.strftime("%H", time.localtime(time.time()))
+        if timing =='08':
+            print('start')
+            run_test()
+            print('end')
+            break
+        else:
+            time.sleep(3000)
 
-
-    # pytest.main() #运行同级目录及下面的全部用例
-# pytest.main(['testCase/campaign/test_campaign_list.py','--alluredir','testReport/reportallure/'])
- # 执行命令 allure generate ./temp -o ./report --clean ，生成测试报告
- #    os.system('allure generate testReport/reportallure -o ./report --clean')
-    #指定运行某个目录下的某个用例
-    # pytest.main(["testCase/campaign/test_campaign_list.py"])
-    #指定运行某个目录下的全部用例
-    pytest.main(["testCase/campaign/"])
-    # pytest.main("-v -s test_campaign_list.py")
+    # run_test()
+    # suite()
